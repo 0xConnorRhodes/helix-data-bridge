@@ -4,13 +4,14 @@ require 'dotenv/load'
 require 'json'
 require 'import_csv'
 require_relative 'lib/load_event_types_config'
+
 require 'pry'
 
 def check_event_config(config_hash)
   remote_config = VAPI.get_helix_event_types
 
-  missing_events = []
   present_events = []
+  missing_events = []
   config_hash.each do |event_type, mappings|
     exists = remote_config.any? { |remote_event| remote_event[:name] == event_type }
     if exists

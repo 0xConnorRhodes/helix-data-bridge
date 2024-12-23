@@ -1,6 +1,3 @@
-require 'vapi'
-require 'dotenv/load'
-
 def compare_event_types(local_config:, remote_config:)
   present_events = []
   missing_events = []

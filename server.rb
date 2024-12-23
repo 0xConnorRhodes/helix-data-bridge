@@ -20,17 +20,24 @@ if !check_event_config(event_types_config)
 	exit(1)
 end
 
-puts 'passed config check'
-exit
+set :port, 8080
 
 get '/' do
   "Under Construction"
 end
 
-post '/event' do
+post '/event/keyid' do
   body = JSON.parse(request.body.read)
+	binding.pry
+	# result = VAPI.create_helix_event(
+	# 	event_type_uid: nil,
+	# 	camera_id: nil,
+	# 	attributes: nil,
+	# 	time: nil
+	# )
 end
 
-post '/event/withtime' do
-  body = JSON.parse(request.body.read)
+post '/event/deviceid' do
+  "Under Construction"
+  # body = JSON.parse(request.body.read)
 end

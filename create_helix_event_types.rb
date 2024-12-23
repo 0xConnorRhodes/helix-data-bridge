@@ -6,6 +6,13 @@ require 'json'
 
 VAPI = Vapi.new(ENV['VERKADA_API_KEY'])
 event_types_config = load_event_types_config('event_types_config.csv')
+
+event_types_config.transform_values! do |mappings|
+  mappings
+    .reject { |mapping| mapping[:data_purpose] == "event type id" }
+    .map { |mapping| mapping.reject { |k, v| v.nil? || k == :data_purpose } }
+end
+
 helix_event_types = VAPI.get_helix_event_types
 
 present_events, missing_events = compare_event_types(

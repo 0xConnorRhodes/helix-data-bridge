@@ -27,6 +27,7 @@ unless missing_events.empty?
   	schema = event_types_config[mis_event].each_with_object({}) do |mapping, schema|
   		schema[mapping[:helix_key]] = mapping[:data_type]
   	end
+
   	result = vapi.create_helix_event_type(
   		name: mis_event,
   		schema: schema
@@ -38,10 +39,7 @@ end
 present_events.each do |pres_event|
 	remote_event_type = helix_event_types.find {|event| event[:name] == pres_event}
 	remote_schema = remote_event_type[:event_schema]
-	# TODO: test if local_schema == remote_schema
-	# will have to do the test after constructing what the remote schema will look like
 
-	# TODO: warn about the event about to be overwritten, force user to type OVERWRITE to proceed
 	local_schema = event_types_config[pres_event].each_with_object({}) do |mapping, schema|
 		schema[mapping[:helix_key]] = mapping[:data_type]
 	end

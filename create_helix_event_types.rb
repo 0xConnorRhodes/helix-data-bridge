@@ -5,7 +5,7 @@ require 'json'
 
 vapi = Vapi.new(ENV['VERKADA_API_KEY'])
 event_types_config = load_event_types_config('event_types_config.csv')
-helix_event_types = vapi.get_helix_event_types #(symbolize_names: false)
+helix_event_types = vapi.get_helix_event_types
 
 present_events = []
 missing_events = []

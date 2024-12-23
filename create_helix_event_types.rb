@@ -4,9 +4,9 @@ require_relative 'lib/load_event_types_config'
 require_relative 'lib/compare_event_types'
 require 'json'
 
-vapi = Vapi.new(ENV['VERKADA_API_KEY'])
+VAPI = Vapi.new(ENV['VERKADA_API_KEY'])
 event_types_config = load_event_types_config('event_types_config.csv')
-helix_event_types = vapi.get_helix_event_types
+helix_event_types = VAPI.get_helix_event_types
 
 present_events, missing_events = compare_event_types(
 	local_config: event_types_config, 
@@ -19,7 +19,7 @@ unless missing_events.empty?
   		schema[mapping[:helix_key]] = mapping[:data_type]
   	end
 
-  	result = vapi.create_helix_event_type(
+  	result = VAPI.create_helix_event_type(
   		name: mis_event,
   		schema: schema
   	)
@@ -52,7 +52,7 @@ present_events.each do |pres_event|
 		puts "If you want to overwrite the remote schema with the local schema, type \"OVERWRITE\""
 		user_input = gets.chomp
 		if user_input == "OVERWRITE"
-			result = vapi.update_helix_event_type(
+			result = VAPI.update_helix_event_type(
 				uid: remote_event_type[:event_type_uid],
 				name: pres_event,
 				schema: local_schema

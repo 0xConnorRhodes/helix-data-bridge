@@ -20,11 +20,13 @@ def check_event_config(config_hash)
       missing_events << event_type
     end
   end
+  missing_events -= present_events
+  present_events.uniq!
+  missing_events.uniq!
 
   # TODO: for each present event, check that the schema matches. 
   # If not, exit on error and warn that create_helix_event_types.rb is destructive
   # present_events.each
-
 
   unless missing_events.empty?
     puts "Warning: The following event types are missing from remote configuration:"

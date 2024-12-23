@@ -2,7 +2,6 @@ require 'vapi'
 require 'dotenv/load'
 require_relative 'lib/load_event_types_config'
 require 'json'
-require 'pry'
 
 vapi = Vapi.new(ENV['VERKADA_API_KEY'])
 event_types_config = load_event_types_config('event_types_config.csv')
@@ -75,5 +74,3 @@ present_events.each do |pres_event|
 		end		
 	end
 end
-
-# binding.pry

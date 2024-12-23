@@ -1,28 +1,46 @@
 # require 'sinatra'
 require 'vapi'
 require 'dotenv/load'
-require 'csv'
 require 'json'
+require_relative 'lib/load_config_csv'
+require_relative 'lib/load_event_types_config'
 require 'pry'
 
-def load_config(file)
-  config = []
-  CSV.foreach(file, headers: true) do |row|
-    config << row.to_h
+def check_event_config(config_hash)
+  remote_config = VAPI.get_helix_event_types
+
+  missing_events = []
+  present_events = []
+  config_hash.each do |event_type, mappings|
+    exists = remote_config.any? { |remote_event| remote_event[:name] == event_type }
+    if exists
+      present_events << event_type
+    else
+      missing_events << event_type
+    end
   end
-  config
+
+  # TODO: for each present event, check that the schema matches. 
+  # If not, exit on error and warn that create_helix_event_types.rb is destructive
+  # present_events.each
+
+
+  unless missing_events.empty?
+    puts "Warning: The following event types are missing from remote configuration:"
+    missing_events.each { |event| puts "* \"#{event}\"" }
+    puts "Please run create_helix_event_types.rb to create them."
+    exit(1)
+  end
+
 end
 
 api_key = ENV['VERKADA_API_KEY']
-
-vapi = Vapi.new(api_key)
+VAPI = Vapi.new(api_key)
 
 devices_config = load_config('devices_config.csv')
-event_types_config = load_config('event_types_config.csv')
+event_types_config = load_event_types_config('event_types_config.csv')
 
-binding.pry
-
-exit
+check_event_config(event_types_config)
 
 get '/' do
   "Under Construction"

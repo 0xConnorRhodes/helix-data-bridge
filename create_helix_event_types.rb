@@ -1,4 +1,4 @@
-require_relative 'lib/load_config_csv'
+require 'vapi'
 require_relative 'lib/load_event_types_config'
 require 'pry'
 

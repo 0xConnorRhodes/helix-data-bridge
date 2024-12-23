@@ -1,8 +1,8 @@
-# require 'sinatra'
+require 'sinatra'
 require 'vapi'
 require 'dotenv/load'
 require 'json'
-require_relative 'lib/load_config_csv'
+require 'import_csv'
 require_relative 'lib/load_event_types_config'
 require 'pry'
 
@@ -37,7 +37,8 @@ end
 api_key = ENV['VERKADA_API_KEY']
 VAPI = Vapi.new(api_key)
 
-devices_config = load_config('devices_config.csv')
+devices_config = import_csv('devices_config.csv')
+binding.pry
 event_types_config = load_event_types_config('event_types_config.csv')
 
 check_event_config(event_types_config)

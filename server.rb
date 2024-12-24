@@ -29,37 +29,37 @@ end
 
 post '/event/by/keyid' do
 	body = JSON.parse(request.body.read)
+
+	helix_event_type_config = nil # remote helix event type config
+	helix_event_attributes = {} # attributes for payload in create_helix_event request
+	device_id_key = nil # key with the value that maps to device id in devices_config
 	event_types_config.each do |event_type_name, mappings|
- 		# Find the event type mapping in this group
  		event_type_mapping = mappings.find { |mapping| mapping[:data_purpose] == "event type id" }
-		
 		next unless event_type_mapping
 
-		id_key = {}
-		id_key[event_type_mapping[:remote_key]] = event_type_mapping[:helix_key]
+		event_id_key = {} # key which identifies which Helix event type this is a request for
+		event_id_key[event_type_mapping[:remote_key]] = event_type_mapping[:helix_key]
 
-		if body[id_key.keys.first] == id_key.values.first
-			# TODO: add logic to generate payload for helix event
-			puts "Found event type mapping for #{event_type_name}"
-			event_type = helix_event_types.select{|et| et[:name] == event_type_name}
+		if body[event_id_key.keys.first] == event_id_key.values.first
+			helix_event_type_config = helix_event_types.select{|et| et[:name] == event_type_name}
 
-			helix_event_attributes = {}
 			body.keys.each do |key|
 				config_row = event_types_config[event_type_name].find{|hash| hash[:remote_key] == key}
-				puts "Found mapping for #{key}"
-				puts "Helix key: #{config_row[:helix_key]}"
+				device_id_key = config_row[:remote_key] if config_row[:data_purpose] == "device id"
+				next if config_row[:data_type].nil?
 				helix_event_attributes[config_row[:helix_key]] = body[key]
-				# binding.pry
 			end
 		end
 	end
-	return "Under Construction"
-	# result = VAPI.create_helix_event(
-	# 	event_type_uid: nil,
-	# 	camera_id: nil,
-	# 	attributes: nil,
-	# 	time: nil
-	# )
+
+	camera_id = devices_config.find{|row| row[:device] ==  body[device_id_key]}[:context_camera]
+
+	result = VAPI.create_helix_event(
+		event_type_uid: helix_event_type_config.first[:event_type_uid],
+		camera_id: camera_id,
+		attributes: helix_event_attributes,
+	)
+	return result
 end
 
 post '/event/by/deviceid' do

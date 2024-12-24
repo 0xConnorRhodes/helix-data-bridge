@@ -20,8 +20,14 @@ end
 def check_event_config(config_hash)
   helix_event_types = VAPI.get_helix_event_types
 
+  sanitized_hash = config_hash.transform_values do |mappings|
+    mappings
+      .reject { |mapping| mapping[:data_purpose] == "event type id" }
+      .map { |mapping| mapping.reject { |k, v| v.nil? || k == :data_purpose } }
+  end
+
   present_events, missing_events = compare_event_types(
-  	local_config: config_hash, 
+  	local_config: sanitized_hash, 
   	remote_config: helix_event_types
   )
 
@@ -29,7 +35,7 @@ def check_event_config(config_hash)
   	remote_event_type = helix_event_types.find {|event| event[:name] == pres_event}
   	remote_schema = remote_event_type[:event_schema]
 
-  	local_schema = config_hash[pres_event].each_with_object({}) do |mapping, schema|
+  	local_schema = sanitized_hash[pres_event].each_with_object({}) do |mapping, schema|
   		schema[mapping[:helix_key]] = mapping[:data_type]
   	end
   	local_schema.transform_keys!(&:to_sym)

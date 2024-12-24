@@ -9,7 +9,7 @@ body = {
 }
 
 response = hp.post(
-  'http://localhost:8080/event/keyid',
+  'http://localhost:8080/event/by/keyid',
   headers: { 'Content-Type' => 'application/json' },
   body: body.to_json
 )

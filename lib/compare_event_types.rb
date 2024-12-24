@@ -20,6 +20,8 @@ end
 def check_event_config(config_hash)
   helix_event_types = VAPI.get_helix_event_types
 
+  return false unless check_data_purpose_field(config_hash)
+
   sanitized_hash = config_hash.transform_values do |mappings|
     mappings
       .reject { |mapping| mapping[:data_purpose] == "event type id" }
@@ -64,4 +66,16 @@ def check_event_config(config_hash)
 		end
   end
   true
+end
+
+def check_data_purpose_field(config_hash)
+  valid_data_purposes = ["device id", "event type id", "metric"]
+  config_hash.each do |event_type, mappings|
+    mappings.each do |mapping|
+      unless valid_data_purposes.include?(mapping[:data_purpose])
+        puts "ERROR: Invalid data_purpose '#{mapping[:data_purpose]}' for event type '#{event_type}'"
+        return false
+      end
+    end
+  end
 end

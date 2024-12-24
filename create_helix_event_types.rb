@@ -7,6 +7,9 @@ require 'json'
 VAPI = Vapi.new(ENV['VERKADA_API_KEY'])
 event_types_config = load_event_types_config('event_types_config.csv')
 
+data_purpose_check = check_data_purpose_field(event_types_config)
+exit(1) unless data_purpose_check
+
 event_types_config.transform_values! do |mappings|
   mappings
     .reject { |mapping| mapping[:data_purpose] == "event type id" }

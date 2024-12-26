@@ -20,7 +20,9 @@ end
 def check_event_config(config_hash)
   helix_event_types = VAPI.get_helix_event_types
 
-  return false unless check_data_purpose_field(config_hash)
+  message = []
+  data_purpose_check, data_purpose_message = check_data_purpose_field(config_hash)
+  message << data_purpose_message unless data_purpose_check
 
   sanitized_hash = config_hash.transform_values do |mappings|
     mappings
@@ -43,29 +45,34 @@ def check_event_config(config_hash)
   	local_schema.transform_keys!(&:to_sym)
 
     unless missing_events.empty?
-      puts "Warning: The following event types are missing from remote configuration:"
-      missing_events.each { |event| puts "* \"#{event}\"" }
-      puts "Please run create_helix_event_types.rb to create them."
-      return false
-      exit(1)
+      message << "Warning: The following event types are missing from remote configuration:"
+      missing_events.each { |event| message << "* \"#{event}\"" }
+      message << "Please run create_helix_event_types.rb to create them."
     end
 
-		unless local_schema == remote_schema
-			puts "WARNING: Event type \"#{pres_event}\" already exists, but it does not match the local event type config"
-			puts "The local config schema is:"
-			puts JSON.pretty_generate(JSON.parse(local_schema.to_json))
-			puts "\n"
-
-			puts "The remote config schema is:"
-			puts JSON.pretty_generate(JSON.parse(remote_schema.to_json))
-			puts "\n"
-
-			puts "If you want to overwrite the remote schema with the local schema, run create_helix_event_types.rb"
-      return false
-			exit(1)
-		end
+  	unless local_schema == remote_schema
+  		message << "WARNING: Event type \"#{pres_event}\" already exists, but it does not match the local event type config"
+  		message << "The local config schema is:"
+  		message << JSON.pretty_generate(JSON.parse(local_schema.to_json))
+  		message << "\n"
+  
+  		message << "The remote config schema is:"
+  		message << JSON.pretty_generate(JSON.parse(remote_schema.to_json))
+  		message << "\n"
+  
+  		message << "If you want to overwrite the remote schema with the local schema, run create_helix_event_types.rb"
+  	end
   end
-  true
+
+  if message.any?
+    message.uniq!
+    puts message
+    File.write('last_error.txt', message.join("\n"))
+    return false
+  else
+    File.delete('last_error.txt') if File.exist?('last_error.txt')
+    return true
+  end
 end
 
 def check_data_purpose_field(config_hash)
@@ -73,8 +80,9 @@ def check_data_purpose_field(config_hash)
   config_hash.each do |event_type, mappings|
     mappings.each do |mapping|
       unless valid_data_purposes.include?(mapping[:data_purpose])
-        puts "ERROR: Invalid data_purpose '#{mapping[:data_purpose]}' for event type '#{event_type}'"
-        return false
+        message =  "ERROR: Invalid data_purpose '#{mapping[:data_purpose]}' for event type '#{event_type}'"
+        puts message
+        return false, message
       end
     end
   end

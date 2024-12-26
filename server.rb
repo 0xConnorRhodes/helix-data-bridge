@@ -18,13 +18,12 @@ helix_event_types = VAPI.get_helix_event_types
 
 if !check_event_config(event_types_config)
 	puts "\nERROR: Failed config check. Resolve errors before running server."
-	exit(1)
 end
 
 set :port, 8080
 
 get '/' do
-	"Under Construction"
+	erb :index
 end
 
 post '/event/by/keyid' do

@@ -45,27 +45,28 @@ def check_event_config(config_hash)
   	local_schema.transform_keys!(&:to_sym)
 
     unless missing_events.empty?
-      message << "Warning: The following event types are missing from remote configuration:"
-      missing_events.each { |event| message << "* \"#{event}\"" }
-      message << "Please run create_helix_event_types.rb to create them."
+      message << "<p>WARNING: The following event types are missing from remote configuration:<ul>"
+      missing_events.each { |event| message << "<li> #{event}</li>" }
+      message << "</ul>Please run create_helix_event_types.rb to create them.</p>"
     end
 
   	unless local_schema == remote_schema
-  		message << "WARNING: Event type \"#{pres_event}\" already exists, but it does not match the local event type config"
-  		message << "The local config schema is:"
+  		message << "<p>WARNING: Event type \"#{pres_event}\" already exists, but it does not match the local event type config</p>"
+  		message << "<p>The local config schema is:<br>"
   		message << JSON.pretty_generate(JSON.parse(local_schema.to_json))
-  		message << "\n"
+  		message << "</p>"
   
-  		message << "The remote config schema is:"
+  		message << "<p>The remote config schema is:<br>"
   		message << JSON.pretty_generate(JSON.parse(remote_schema.to_json))
-  		message << "\n"
+  		message << "</p>"
   
-  		message << "If you want to overwrite the remote schema with the local schema, run create_helix_event_types.rb"
+  		message << "<p>If you want to overwrite the remote schema with the local schema, run create_helix_event_types.rb</p>"
   	end
   end
 
   if message.any?
     message.uniq!
+    message = message.select { |m| m.start_with?("<p>ERROR: Invalid data_purpose") } if message.any? { |m| m.start_with?("<p>ERROR: Invalid data_purpose") }
     puts message
     File.write('last_error.txt', message.join("\n"))
     return false
@@ -80,7 +81,7 @@ def check_data_purpose_field(config_hash)
   config_hash.each do |event_type, mappings|
     mappings.each do |mapping|
       unless valid_data_purposes.include?(mapping[:data_purpose])
-        message =  "ERROR: Invalid data_purpose '#{mapping[:data_purpose]}' for event type '#{event_type}'"
+        message =  "<p>ERROR: Invalid data_purpose '#{mapping[:data_purpose]}' for event type '#{event_type}'</p>"
         puts message
         return false, message
       end

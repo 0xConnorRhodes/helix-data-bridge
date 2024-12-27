@@ -27,4 +27,6 @@ eval "$(~/.local/bin/mise activate bash)"
 
 mise use --global ruby@3.3.6
 
+gem update --system
+
 exec bash # reload bash to apply mise activation

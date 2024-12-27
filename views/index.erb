@@ -1,4 +1,19 @@
 <h1>Verkada Helix Data Translator</h1>
-<% if File.exist?('last_error.txt') %>
-    <%= File.read('last_error.txt') %>
+<h2>Status</h2>
+<h3>API Key</h3>
+<% if $api_key_status %>
+	<%= "API key uploaded for org: #{$org_id}" %>
+<% else %>
+	<%= "ERROR: No API key configured" %>
+<% end %>
+
+<h3>Configuration</h3>
+<% if $api_key_status %>
+	<% if $event_config_message.any? %>
+	    <%= $event_config_message.join("\n") %>
+	<% else %>
+	    <%= "Configuration checks passed. Ready to translate events." %>
+	<% end %>
+<% else %>
+	<%= "Configuration will be checked after API key is configured." %>
 <% end %>

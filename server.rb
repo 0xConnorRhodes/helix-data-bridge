@@ -5,20 +5,23 @@ require 'json'
 require 'import_csv'
 require_relative 'lib/load_event_types_config'
 require_relative 'lib/compare_event_types'
+require_relative 'lib/check_api_key'
 
 require 'pry'
 
 api_key = ENV['VERKADA_API_KEY']
-VAPI = Vapi.new(api_key)
+$vapi = Vapi.new(api_key)
 
 devices_config = import_csv('devices_config.csv')
 event_types_config = load_event_types_config('event_types_config.csv')
 
-helix_event_types = VAPI.get_helix_event_types
+$api_key_status = check_api_key
 
-if !check_event_config(event_types_config)
-	puts "\nERROR: Failed config check. Resolve errors before running server."
+if $api_key_status
+  $event_config_message = check_event_config(event_types_config)
+  helix_event_types = $vapi.get_helix_event_types if $api_key_status
 end
+
 
 set :port, 8080
 
@@ -53,7 +56,7 @@ post '/event/by/keyid' do
 
 	camera_id = devices_config.find{|row| row[:device] ==  body[device_id_key]}[:context_camera]
 
-	result = VAPI.create_helix_event(
+	result = $vapi.create_helix_event(
 		event_type_uid: helix_event_type_config.first[:event_type_uid],
 		camera_id: camera_id,
 		attributes: helix_event_attributes,

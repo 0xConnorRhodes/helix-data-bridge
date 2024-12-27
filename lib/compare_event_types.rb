@@ -18,7 +18,7 @@ def compare_event_types(local_config:, remote_config:)
 end
 
 def check_event_config(config_hash)
-  helix_event_types = VAPI.get_helix_event_types
+  helix_event_types = $vapi.get_helix_event_types
 
   message = []
   data_purpose_check, data_purpose_message = check_data_purpose_field(config_hash)
@@ -67,12 +67,9 @@ def check_event_config(config_hash)
   if message.any?
     message.uniq!
     message = message.select { |m| m.start_with?("<p>ERROR: Invalid data_purpose") } if message.any? { |m| m.start_with?("<p>ERROR: Invalid data_purpose") }
-    puts message
-    File.write('last_error.txt', message.join("\n"))
-    return false
+    return message
   else
-    File.delete('last_error.txt') if File.exist?('last_error.txt')
-    return true
+    return []
   end
 end
 
@@ -82,7 +79,6 @@ def check_data_purpose_field(config_hash)
     mappings.each do |mapping|
       unless valid_data_purposes.include?(mapping[:data_purpose])
         message =  "<p>ERROR: Invalid data_purpose '#{mapping[:data_purpose]}' for event type '#{event_type}'</p>"
-        puts message
         return false, message
       end
     end

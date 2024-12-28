@@ -4,7 +4,7 @@ require 'dotenv/load'
 require 'json'
 require 'import_csv'
 require_relative 'lib/load_event_types_config'
-require_relative 'lib/compare_event_types'
+require_relative 'lib/check_config_files'
 require_relative 'lib/check_api_key'
 
 require 'pry'

@@ -1,13 +1,14 @@
 <h1>Verkada Helix Data Translator</h1>
+
 <h2>Status</h2>
-<h3>API Key</h3>
+<h3>api key</h3>
 <% if $api_key_status %>
-	<%= "API key uploaded for org: #{$org_id}" %>
+	<%= "API key configured for org: #{$org_id}" %>
 <% else %>
 	<%= "ERROR: No API key configured" %>
 <% end %>
 
-<h3>Configuration</h3>
+<h3>config check</h3>
 <% if $api_key_status %>
 	<% if $event_config_message.any? %>
 	    <%= $event_config_message.join("\n") %>
@@ -17,3 +18,12 @@
 <% else %>
 	<%= "Configuration will be checked after API key is configured." %>
 <% end %>
+
+<h2>Configuration</h2>
+<p>
+	<ul>
+		<li><a href="/config/api-key">Configure API key</a></li>
+		<li><a href="/config/event-types">Configure event translation</a>
+		<li><a href="/config/devices">Configure device mappings</a></li>
+	</ul>
+</p>

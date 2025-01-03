@@ -29,6 +29,39 @@ get '/' do
 	erb :index
 end
 
+get '/config/api-key' do
+		erb :api_key_form
+end
+
+post '/config/api-key' do
+	key = params["api_key"]
+	key.strip!
+	$vapi = Vapi.new(key)
+	begin
+		$org_id = $vapi.get_org_id
+	rescue => e
+		if e.message == "Failed to get token: 409 - {\"id\": \"dlvp\", \"message\": \"Authentication error\", \"data\": null}"
+			<<~HTML
+				<p>API Authentication failed. Please verify API key and permissions.</p>
+				<a href='/config/api-key'>Back to config page</a>
+			HTML
+		else
+			<<~HTML
+				Error: #{e.message}
+			HTML
+		end
+	else
+		File.write('.env', "VERKADA_API_KEY=\"#{key}\"")
+		$api_key_status = check_api_key
+		$event_config_message = check_event_config(event_types_config)
+		helix_event_types = $vapi.get_helix_event_types if $api_key_status
+		erb <<~HTML
+			<p>API key updated successfully for org: <%= $org_id %></p>
+			<a href='/'>Back to main page</a>
+		HTML
+	end
+end
+
 post '/event/by/keyid' do
 	body = JSON.parse(request.body.read)
 

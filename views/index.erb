@@ -9,15 +9,25 @@
 <% end %>
 
 <h3>config check</h3>
-<% if $api_key_status %>
-	<% if $config_message.any? %>
-	    <%= $config_message.join("\n") %>
-	<% else %>
-	    <%= "Configuration checks passed. Ready to translate events." %>
-	<% end %>
+<% if $config_message.any? %>
+	<%= $config_message.join("\n") %>
 <% else %>
-	<%= "Configuration will be checked after API key is configured." %>
+	<%= "Configuration will be checked after API key is configured and both configuration files are uploaded. Please upload configuration files after adding your API key." %>
 <% end %>
+
+<ul>
+<% if File.exist?('event_types_config.csv') %>
+	<li>Event types config file added.</li>
+<% else %>
+	<li>Event types config file has not been added.</li>
+<% end %>
+
+<% if File.exist?('devices_config.csv') %>
+	<li>Device mappings config file added.</li>
+<% else %>
+	<li>Device mappings config file has not been added.</li>
+<% end %>
+</ul>
 
 <h2>Configuration</h2>
 <p>

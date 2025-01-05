@@ -66,7 +66,7 @@ def check_event_config(config_hash)
 
   if message.any?
     message.uniq!
-    message = message.select { |m| m.start_with?("<p>ERROR: Invalid data_purpose") } if message.any? { |m| m.start_with?("<p>ERROR: Invalid data_purpose") }
+    message = message.select { |m| m.start_with?("<p>EVENT TYPE ERROR: Invalid data_purpose") } if message.any? { |m| m.start_with?("<p>EVENT TYPE ERROR: Invalid data_purpose") }
     return message
   else
     return []
@@ -78,7 +78,7 @@ def check_data_purpose_field(config_hash)
   config_hash.each do |event_type, mappings|
     mappings.each do |mapping|
       unless valid_data_purposes.include?(mapping[:data_purpose])
-        message =  "<p>ERROR: Invalid data_purpose '#{mapping[:data_purpose]}' for event type '#{event_type}'</p>"
+        message =  "<p>EVENT TYPE ERROR: Invalid data_purpose '#{mapping[:data_purpose]}' for event type '#{event_type}'</p>"
         return false, message
       end
     end

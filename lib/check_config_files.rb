@@ -45,13 +45,13 @@ def check_event_config(config_hash)
   	local_schema.transform_keys!(&:to_sym)
 
     unless missing_events.empty?
-      message << "<p>WARNING: The following event types are missing from remote configuration:<ul>"
+      message << "<p>EVENT TYPE WARNING: The following event types are missing from remote configuration:<ul>"
       missing_events.each { |event| message << "<li> #{event}</li>" }
       message << "</ul>Please run create_helix_event_types.rb to create them.</p>"
     end
 
   	unless local_schema == remote_schema
-  		message << "<p>WARNING: Event type \"#{pres_event}\" already exists, but it does not match the local event type config</p>"
+  		message << "<p>EVENT TYPE WARNING: Event type \"#{pres_event}\" already exists, but it does not match the local event type config</p>"
   		message << "<p>The local config schema is:<br>"
   		message << JSON.pretty_generate(JSON.parse(local_schema.to_json))
   		message << "</p>"
@@ -66,7 +66,7 @@ def check_event_config(config_hash)
 
   if message.any?
     message.uniq!
-    message = message.select { |m| m.start_with?("<p>ERROR: Invalid data_purpose") } if message.any? { |m| m.start_with?("<p>ERROR: Invalid data_purpose") }
+    message = message.select { |m| m.start_with?("<p>EVENT TYPE ERROR: Invalid data_purpose") } if message.any? { |m| m.start_with?("<p>EVENT TYPE ERROR: Invalid data_purpose") }
     return message
   else
     return ["<p>Event types configuration checks passed.</p>"]
@@ -78,7 +78,7 @@ def check_data_purpose_field(config_hash)
   config_hash.each do |event_type, mappings|
     mappings.each do |mapping|
       unless valid_data_purposes.include?(mapping[:data_purpose])
-        message =  "<p>ERROR: Invalid data_purpose '#{mapping[:data_purpose]}' for event type '#{event_type}'</p>"
+        message =  "<p>EVENT TYPE ERROR: Invalid data_purpose '#{mapping[:data_purpose]}' for event type '#{event_type}'</p>"
         return false, message
       end
     end
@@ -93,7 +93,7 @@ def check_devices_config(config_array)
   actual_columns = config_array.first&.keys&.map(&:to_s)
   
   unless actual_columns == expected_columns
-    message << "<p>ERROR: Invalid columns in device mappings config. Expected 'Device' and 'Context Camera', got: #{actual_columns.join(', ')}</p>"
+    message << "<p>DEVICE MAPPING ERROR: Invalid columns in device mappings config. Expected 'Device' and 'Context Camera', got: #{actual_columns.join(', ')}</p>"
     return message
   end
 
@@ -101,7 +101,7 @@ def check_devices_config(config_array)
   config_array.each_with_index do |row, index|
     row_number = index + 1
     if row[:device].to_s.strip.empty? || row[:context_camera].to_s.strip.empty?
-      message << "<p>ERROR: Missing value in row #{row_number}. Both 'Device' and 'Context Camera' must have values.</p>"
+      message << "<p>DEVICE MAPPING ERROR: Missing value in row #{row_number}. Both 'Device' and 'Context Camera' must have values.</p>"
     end
   end
 

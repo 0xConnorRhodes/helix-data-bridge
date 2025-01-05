@@ -39,39 +39,6 @@ get '/' do
 	erb :index
 end
 
-get '/config/api-key' do
-		erb :api_key_form
-end
-
-post '/config/api-key' do
-	key = params["api_key"]
-	key.strip!
-	$vapi = Vapi.new(key)
-	begin
-		$org_id = $vapi.get_org_id
-	rescue => e
-		if e.message == "Failed to get token: 409 - {\"id\": \"dlvp\", \"message\": \"Authentication error\", \"data\": null}"
-			<<~HTML
-				<p>API Authentication failed. Please verify API key and permissions.</p>
-				<a href='/config/api-key'>Back to config page</a>
-			HTML
-		else
-			<<~HTML
-				Error: #{e.message}
-			HTML
-		end
-	else
-		File.write('.env', "VERKADA_API_KEY=\"#{key}\"")
-		$api_key_status = check_api_key
-		# $config_message = check_event_config(event_types_config)
-		helix_event_types = $vapi.get_helix_event_types if $api_key_status
-		erb <<~HTML
-			<p>API key updated successfully for org: <%= $org_id %></p>
-			<a href='/'>Back to main page</a>
-		HTML
-	end
-end
-
 post '/event/by/keyid' do
 	body = JSON.parse(request.body.read)
 
@@ -107,13 +74,47 @@ post '/event/by/keyid' do
 	return result
 end
 
-get '/config/event-types' do
-  erb :event_types_config_form
+get '/config/api-key' do
+		erb :api_key_form
 end
 
-get '/help/event-types' do
-	content = File.read('views/help/event_types_config.html')
-	content
+post '/event/by/deviceid' do
+	# detect device by key/value which maps to device id
+	"Under Construction"
+	# body = JSON.parse(request.body.read)
+end
+
+post '/config/api-key' do
+	key = params["api_key"]
+	key.strip!
+	$vapi = Vapi.new(key)
+	begin
+		$org_id = $vapi.get_org_id
+	rescue => e
+		if e.message == "Failed to get token: 409 - {\"id\": \"dlvp\", \"message\": \"Authentication error\", \"data\": null}"
+			<<~HTML
+				<p>API Authentication failed. Please verify API key and permissions.</p>
+				<a href='/config/api-key'>Back to config page</a>
+			HTML
+		else
+			<<~HTML
+				Error: #{e.message}
+			HTML
+		end
+	else
+		File.write('.env', "VERKADA_API_KEY=\"#{key}\"")
+		$api_key_status = check_api_key
+		# $config_message = check_event_config(event_types_config)
+		helix_event_types = $vapi.get_helix_event_types if $api_key_status
+		erb <<~HTML
+			<p>API key updated successfully for org: <%= $org_id %></p>
+			<a href='/'>Back to main page</a>
+		HTML
+	end
+end
+
+get '/config/event-types' do
+  erb :event_types_config_form
 end
 
 post '/config/event-types' do
@@ -137,11 +138,6 @@ get '/config/device-mappings' do
 	erb :device_mappings_config_form
 end
 
-get '/help/device-mappings' do
-	content = File.read('views/help/device_mappings_config.html')
-	content
-end
-
 post '/config/device-mappings' do
 	uploaded_file = import_csv(params[:config_file][:tempfile].path)
 	if $api_key_status
@@ -159,8 +155,12 @@ post '/config/device-mappings' do
 	redirect '/'
 end
 
-post '/event/by/deviceid' do
-	# detect device by key/value which maps to device id
-	"Under Construction"
-	# body = JSON.parse(request.body.read)
+get '/help/event-types' do
+	content = File.read('views/help/event_types_config.html')
+	content
+end
+
+get '/help/device-mappings' do
+	content = File.read('views/help/device_mappings_config.html')
+	content
 end

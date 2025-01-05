@@ -1,0 +1,46 @@
+<h1>Device Mappings Configuration Format</h1>
+
+<p>The device mappings configuration file should be a CSV file in the format below.</p>
+
+<style>
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 20px 0;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  th {
+    background-color: #f2f2f2;
+  }
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+</style>
+
+<table border="1">
+  <tr>
+    <th>Device</th>
+    <th>Context Camera</th>
+  </tr>
+  <tr>
+    <td>Device1 ID</td>
+    <td>a1b2c3d4-5e6f-47g8-9h0i-j1k2l3m4n5o6</td>
+  </tr>
+  <tr>
+    <td>Device2 ID</td>
+    <td>b2c3d4e5-6f7g-89h0-i1j2-k3l4m5n6o7p8</td>
+  </tr>
+</table>
+
+<p>
+  <ul>
+    <li><b>Device</b>: The identifier of this unique device passed as a the value of a dedicated JSON key</li>
+    <li><b>Context Camera</b>: The unique ID of the context camera from your command org. The Camera ID can be found in the browser URL when the camera is opened in Command or using the <a href="https://apidocs.verkada.com/reference/getcamerainfoviewv1">Get Camera Data API endpoint</a></li>
+  </ul>
+</p>
+
+

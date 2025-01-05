@@ -130,6 +130,32 @@ post '/config/event-types' do
 	redirect '/'
 end
 
+get '/config/device-mappings' do
+	erb :device_mappings_config_form
+end
+
+get '/help/device-mappings' do
+	content = File.read('views/help/device_mappings_config.html')
+	content
+end
+
+post '/config/device-mappings' do
+	uploaded_file = load_event_types_config(params[:config_file][:tempfile].path)
+	if $api_key_status
+		$config_message = []
+		$event_config_message = []
+		$event_config_message = check_event_config(uploaded_file)
+
+		if $event_config_message == ["<p>Event types configuration checks passed.</p>"]
+			File.write('event_types_config.csv', params[:config_file][:tempfile].read)
+		end
+
+		$config_message = $event_config_message + $device_config_message
+	  helix_event_types = $vapi.get_helix_event_types if $api_key_status
+	end
+	redirect '/'
+end
+
 post '/event/by/deviceid' do
 	# detect device by key/value which maps to device id
 	"Under Construction"

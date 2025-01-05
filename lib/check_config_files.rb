@@ -85,6 +85,25 @@ def check_data_purpose_field(config_hash)
   end
 end
 
-def check_devices_config
-  nil
+def check_devices_config(config_array)
+  message = []
+  
+  # Check column names
+  expected_columns = ["device", "context_camera"]
+  actual_columns = config_array.first&.keys&.map(&:to_s)
+  
+  unless actual_columns == expected_columns
+    message << "<p>ERROR: Invalid columns in device mappings config. Expected 'Device' and 'Context Camera', got: #{actual_columns.join(', ')}</p>"
+    return message
+  end
+
+  # Check for empty values
+  config_array.each_with_index do |row, index|
+    row_number = index + 1
+    if row[:device].to_s.strip.empty? || row[:context_camera].to_s.strip.empty?
+      message << "<p>ERROR: Missing value in row #{row_number}. Both 'Device' and 'Context Camera' must have values.</p>"
+    end
+  end
+
+  message.any? ? message : ["<p>Device mappings configuration checks passed.</p>"]
 end

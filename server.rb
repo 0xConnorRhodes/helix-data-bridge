@@ -12,13 +12,20 @@ require 'pry'
 api_key = ENV['VERKADA_API_KEY']
 $vapi = Vapi.new(api_key)
 
-devices_config = import_csv('devices_config.csv')
-event_types_config = load_event_types_config('event_types_config.csv')
+devices_config = import_csv('devices_config.csv') if File.exist?('devices_config.csv')
+event_types_config = load_event_types_config('event_types_config.csv') if File.exist?('event_types_config.csv')
+
+$org_id = $vapi.get_org_id
 
 $api_key_status = check_api_key
 
 if $api_key_status
-  $event_config_message = check_event_config(event_types_config)
+	$config_message = []
+	$event_config_message = []
+	$device_config_message = []
+	$event_config_message = File.exist?('event_types_config.csv') ? check_event_config(event_types_config) : $event_config_message.append("<p>No event types configuration file.</p")
+	$device_config_message = File.exist?('devices_config.csv') ? check_devices_config(devices_config) : $device_config_message.append("<p>No device mappings configuration file.</p>")
+	$config_message = $event_config_message + $device_config_message
   helix_event_types = $vapi.get_helix_event_types if $api_key_status
 end
 
@@ -53,7 +60,7 @@ post '/config/api-key' do
 	else
 		File.write('.env', "VERKADA_API_KEY=\"#{key}\"")
 		$api_key_status = check_api_key
-		$event_config_message = check_event_config(event_types_config)
+		$config_message = check_event_config(event_types_config)
 		helix_event_types = $vapi.get_helix_event_types if $api_key_status
 		erb <<~HTML
 			<p>API key updated successfully for org: <%= $org_id %></p>
@@ -95,6 +102,32 @@ post '/event/by/keyid' do
 		attributes: helix_event_attributes,
 	)
 	return result
+end
+
+get '/config/event-types' do
+  erb :event_types_config_form
+end
+
+get '/help/event-types' do
+	content = File.read('views/help/event_types_config.html')
+	content
+end
+
+post '/config/event-types' do
+	uploaded_file = load_event_types_config(params[:config_file][:tempfile].path)
+	if $api_key_status
+		$config_message = []
+		$event_config_message = []
+		$event_config_message = check_event_config(uploaded_file)
+
+		if $event_config_message == ["<p>Event types configuration checks passed.</p>"]
+			File.write('event_types_config.csv', params[:config_file][:tempfile].read)
+		end
+
+		$config_message = $event_config_message + $device_config_message
+	  helix_event_types = $vapi.get_helix_event_types if $api_key_status
+	end
+	redirect '/'
 end
 
 post '/event/by/deviceid' do

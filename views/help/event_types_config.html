@@ -1,0 +1,91 @@
+  <p>
+    <a href="/config/event-types">Back to event types configuration page</a>
+  </p>
+
+<p>
+  The event types configuration file should be a CSV file in the format below.
+</p>
+
+<style>
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 20px 0;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  th {
+    background-color: #f2f2f2;
+  }
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+</style>
+
+<table>
+  <thead>
+    <tr>
+      <th>Remote Key</th>
+      <th>Helix Key</th>
+      <th>Data Type</th>
+      <th>Data Purpose</th>
+      <th>Helix Event Type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>sensorName</td>
+      <td>Sensor Name</td>
+      <td>string</td>
+      <td>device id</td>
+      <td>Noise Alert</td>
+    </tr>
+    <tr>
+      <td>dataSource</td>
+      <td>Noise Level</td>
+      <td>float</td>
+      <td>metric</td>
+      <td>Noise Alert</td>
+    </tr>
+    <tr>
+      <td>dataSource</td>
+      <td>Noise Level</td>
+      <td></td>
+      <td>event type id</td>
+      <td>Noise Alert</td>
+    </tr>
+    <tr>
+      <td>sensorName</td>
+      <td>Sensor Name</td>
+      <td>string</td>
+      <td>device id</td>
+      <td>Motion Alert</td>
+    </tr>
+    <tr>
+      <td>dataSource</td>
+      <td>Motion</td>
+      <td></td>
+      <td>event type id</td>
+      <td>Motion Alert</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  <ul>
+    <li><b>Remote Key</b>: The name of the key in the JSON data sent by the external device</li>
+    <li><b>Helix Key</b>: The name of the corresponding key in the Helix event type</li>
+    <li><b>Data Type</b>: Date type for the value that corresponds to that key. The supported types are string, boolean, integer, and float. This field may be left blank if the data purpose is "event type id" (see below.)</li>
+    <li><b>Data Purpose</b>: This field specifies how the Data Translator should use the data supplied. The supported options are:</li>
+    <ul>
+      <li><i>metric</i>: Data that will be passed to the Helix event (example: price of a purchased product.)</li>
+      <li><i>device id</i>: Identifies which device the event came from. This information is used with the device mappings configuration file to pair an associated camera.</li>
+      <li><i>event type id</i>: This data is not used in the Helix event. The presence of this key identifies which Helix event type the data should be associated with. This is only necessary if the same device will be sending events in multiple event types. In the example above, "Noise Level" is used both as a metric and an event type id, so it is entered into the configuration file twice.</li>
+    </ul>
+    <li><b>Helix Event Type</b>: The name of the Helix event type this data is associated with</li>
+  </ul>
+  For more information, see <a href="https://apidocs.verkada.com/reference/getting-started">Verkada Helix API Documentation</a>.
+</p>

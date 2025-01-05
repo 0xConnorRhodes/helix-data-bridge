@@ -10,8 +10,8 @@
 
 <h3>config check</h3>
 <% if $api_key_status %>
-	<% if $event_config_message.any? %>
-	    <%= $event_config_message.join("\n") %>
+	<% if $config_message.any? %>
+	    <%= $config_message.join("\n") %>
 	<% else %>
 	    <%= "Configuration checks passed. Ready to translate events." %>
 	<% end %>

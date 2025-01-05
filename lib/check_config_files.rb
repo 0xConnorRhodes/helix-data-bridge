@@ -69,7 +69,7 @@ def check_event_config(config_hash)
     message = message.select { |m| m.start_with?("<p>ERROR: Invalid data_purpose") } if message.any? { |m| m.start_with?("<p>ERROR: Invalid data_purpose") }
     return message
   else
-    return []
+    return ["<p>Event types configuration checks passed.</p>"]
   end
 end
 
@@ -83,4 +83,8 @@ def check_data_purpose_field(config_hash)
       end
     end
   end
+end
+
+def check_devices_config
+  nil
 end

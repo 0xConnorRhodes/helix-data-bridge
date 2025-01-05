@@ -1,40 +1,50 @@
-<h1>Verkada Helix Data Translator</h1>
+<h1 class="mb-4">Verkada Helix Data Translator</h1>
 
-<h2>Status</h2>
-<h3>api key</h3>
-<% if $api_key_status %>
-	<%= "API key configured for org: #{$org_id}" %>
-<% else %>
-	<%= "No API key configured. Please configure a key using the link below." %>
-<% end %>
+<div class="card mb-4">
+  <div class="card-header">
+    <h2 class="h4 mb-0">Status</h2>
+  </div>
+  <div class="card-body">
+    <h3 class="h5">API Key</h3>
+    <% if $api_key_status %>
+      <p class="text-success"><%= "API key configured for org: #{$org_id}" %></p>
+    <% else %>
+      <p class="text-warning"><%= "No API key configured. Please configure a key using the link below." %></p>
+    <% end %>
 
-<h3>config check</h3>
-<% if $config_message.any? %>
-	<%= $config_message.join("\n") %>
-<% else %>
-	<%= "Configuration will be checked after API key is configured and both configuration files are uploaded. Please upload configuration files after adding your API key." %>
-<% end %>
+    <h3 class="h5 mt-4">Config Check</h3>
+    <% if $config_message.any? %>
+      <%= $config_message.join("\n") %>
+    <% else %>
+      <p class="text-muted"><%= "Configuration will be checked after API key is configured and both configuration files are uploaded. Please upload configuration files after adding your API key." %></p>
+    <% end %>
 
-<h3>config files added</h3>
-<ul>
-<% if File.exist?('event_types_config.csv') %>
-	<li>Event types config file added.</li>
-<% else %>
-	<li>Event types config file has not been added.</li>
-<% end %>
+    <h3 class="h5 mt-4">Config Files Added</h3>
+    <ul class="list-group">
+      <% if File.exist?('event_types_config.csv') %>
+        <li class="list-group-item text-success">Event types config file added.</li>
+      <% else %>
+        <li class="list-group-item text-warning">Event types config file has not been added.</li>
+      <% end %>
 
-<% if File.exist?('devices_config.csv') %>
-	<li>Device mappings config file added.</li>
-<% else %>
-	<li>Device mappings config file has not been added.</li>
-<% end %>
-</ul>
+      <% if File.exist?('devices_config.csv') %>
+        <li class="list-group-item text-success">Device mappings config file added.</li>
+      <% else %>
+        <li class="list-group-item text-warning">Device mappings config file has not been added.</li>
+      <% end %>
+    </ul>
+  </div>
+</div>
 
-<h2>Configuration</h2>
-<p>
-	<ul>
-		<li><a href="/config/api-key">Configure API key</a></li>
-		<li><a href="/config/event-types">Configure event translation</a>
-		<li><a href="/config/device-mappings">Configure device mappings</a></li>
-	</ul>
-</p>
+<div class="card">
+  <div class="card-header">
+    <h2 class="h4 mb-0">Configuration</h2>
+  </div>
+  <div class="card-body">
+    <div class="list-group d-flex flex-column gap-2">
+      <a href="/config/api-key" class="btn btn-primary">Configure API key</a>
+      <a href="/config/event-types" class="btn btn-primary">Configure event translation</a>
+      <a href="/config/device-mappings" class="btn btn-primary">Configure device mappings</a>
+    </div>
+  </div>
+</div>

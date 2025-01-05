@@ -104,12 +104,8 @@ post '/config/api-key' do
 	else
 		File.write('.env', "VERKADA_API_KEY=\"#{key}\"")
 		$api_key_status = check_api_key
-		# $config_message = check_event_config(event_types_config)
 		helix_event_types = $vapi.get_helix_event_types if $api_key_status
-		erb <<~HTML
-			<p>API key updated successfully for org: <%= $org_id %></p>
-			<a href='/'>Back to main page</a>
-		HTML
+		redirect '/'
 	end
 end
 

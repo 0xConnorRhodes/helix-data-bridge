@@ -29,6 +29,23 @@ eval "$(~/.local/bin/mise activate bash)"
 
 mise use --global ruby@3.3.6
 
-gem update --system
+git clone https://github.com/0xConnorRhodes/ruby-modules.git /tmp/ruby-modules && \
+    find /tmp/ruby-modules -type f ! -name "*.rb" -delete && \
+    cp -r /tmp/ruby-modules/* $HOME/.local/share/mise/installs/ruby/latest/lib/ruby/site_ruby/ && \
+    rm -rf /tmp/ruby-modules
+
+git clone https://github.com/0xConnorRhodes/verkada-api-rb.git /tmp/ruby-vapi && \
+    find /tmp/ruby-vapi -type f ! -name "*.rb" -delete && \
+    cp -r /tmp/ruby-vapi/* $HOME/.local/share/mise/installs/ruby/latest/lib/ruby/site_ruby/ && \
+    rm -rf /tmp/ruby-vapi
+
+$HOME/.local/share/mise/installs/ruby/3.3.6/bin/gem update --system
+
+
 
 exec bash # reload bash to apply mise activation
+
+
+# TODO:
+# bundle install in the project directory
+# install vapi

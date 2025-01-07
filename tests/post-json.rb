@@ -14,16 +14,16 @@ motion_post = hp.post(
   body: motion_body.to_json
 )
 
-vape_body = {
+tamper_body = {
   sensorName: "234",
-  dataSource: "Vape"
+  dataSource: "Tamper"
 }
 
-vape_post = hp.post(
+tamper_post = hp.post(
   'http://localhost:8080/event/by/keyid',
   headers: { 'Content-Type' => 'application/json' }, 
-  body: vape_body.to_json
+  body: tamper_body.to_json
 )
 
 puts "Motion response code: #{motion_post.code}"
-puts "Vape response code: #{vape_post.code}"
+puts "Tamper response code: #{tamper_post.code}"

@@ -126,6 +126,7 @@ post '/config/event-types' do
 
 		$config_message = $event_config_message + $device_config_message
 	  helix_event_types = $vapi.get_helix_event_types if $api_key_status
+          event_types_config = load_event_types_config('event_types_config.csv') if File.exist?('event_types_config.csv')
 	end
 	redirect '/'
 end
@@ -147,6 +148,7 @@ post '/config/device-mappings' do
 
 		$config_message = $event_config_message + $device_config_message
 	  helix_event_types = $vapi.get_helix_event_types if $api_key_status
+          devices_config = import_csv('devices_config.csv') if File.exist?('devices_config.csv')
 	end
 	redirect '/'
 end

@@ -41,10 +41,7 @@ git clone https://github.com/0xConnorRhodes/verkada-api-rb.git /tmp/ruby-vapi &&
 
 $HOME/.local/share/mise/installs/ruby/3.3.6/bin/gem update --system
 
-
-
 exec bash # reload bash to apply mise activation
-
 
 # TODO:
 # bundle install in the project directory

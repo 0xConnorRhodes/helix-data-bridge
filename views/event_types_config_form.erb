@@ -1,16 +1,21 @@
-<form action="/config/event-types" method="POST" enctype="multipart/form-data">
-  <p>
-    <a href="/">Back to main page</a>
-  </p>
-  <p>
-    Upload your Helix event types config here:<br> 
-  <input type="file" id="config_file" name="config_file" accept=".csv" required><br>
-  <input type="submit" value="Upload Config">
-  </p>
-</form>
+<div class="card">
+  <div class="card-header">
+    <h2 class="h4 mb-0">Configure Event Types</h2>
+  </div>
+  <div class="card-body">
+    <a href="/" class="btn btn-outline-secondary mb-4">Back to main page</a>
 
-<p>
-  The Helix Data Bridge will create the necessary Helix event types in your Command org if they do not already exist.
+    <form action="/config/event-types" method="POST" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label for="config_file" class="form-label">Upload your Helix event types config here:</label>
+        <input type="file" class="form-control" id="config_file" name="config_file" accept=".csv" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Upload Config</button>
+    </form>
 
-  For more information on the event types configuration format, see <a href="/help/event-types">here</a>.
-</p>
+    <div class="alert alert-info mt-4">
+      The Verkada Data Translator will create the necessary Helix event types in your Command org if they do not already exist.
+      For more information on the event types configuration format, see <a href="/help/event-types">here</a>.
+    </div>
+  </div>
+</div>

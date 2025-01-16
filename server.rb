@@ -7,8 +7,6 @@ require_relative 'lib/load_event_types_config'
 require_relative 'lib/check_config_files'
 require_relative 'lib/check_api_key'
 
-require 'pry'
-
 api_key = ENV['VERKADA_API_KEY']
 $vapi = Vapi.new(api_key)
 
@@ -76,12 +74,6 @@ end
 
 get '/config/api-key' do
 		erb :api_key_form
-end
-
-post '/event/by/deviceid' do
-	# detect device by key/value which maps to device id
-	"Under Construction"
-	# body = JSON.parse(request.body.read)
 end
 
 post '/config/api-key' do

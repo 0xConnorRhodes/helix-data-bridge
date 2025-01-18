@@ -6,30 +6,29 @@ require 'import_csv'
 require_relative 'lib/load_event_types_config'
 require_relative 'lib/check_config_files'
 require_relative 'lib/check_api_key'
+require_relative 'lib/create_event_types'
 
 api_key = ENV['VERKADA_API_KEY']
 $vapi = Vapi.new(api_key)
 
-$api_key_status = check_api_key
-
-devices_config = import_csv('devices_config.csv') if File.exist?('devices_config.csv')
-event_types_config = load_event_types_config('event_types_config.csv') if File.exist?('event_types_config.csv')
-
+# TODO: simplify config messages since you're always sending the create event post
+# TODO: factor process-config code into a function, run that function on startup & on each config upload
 $config_message = []
 $event_config_message = []
 $device_config_message = []
 
-if $api_key_status
-  $org_id = $vapi.get_org_id
-	$config_message = []
-	$event_config_message = []
-	$device_config_message = []
-	$event_config_message = File.exist?('event_types_config.csv') ? check_event_config(event_types_config) : $event_config_message.append("<p>No event types configuration file.</p")
-	$device_config_message = File.exist?('devices_config.csv') ? check_devices_config(devices_config) : $device_config_message.append("<p>No device mappings configuration file.</p>")
-	$config_message = $event_config_message + $device_config_message
-  helix_event_types = $vapi.get_helix_event_types if $api_key_status
+def process_config
+	$api_key_status = check_api_key
+  $org_id = $vapi.get_org_id if $api_key_status
+  $helix_event_types = $vapi.get_helix_event_types if $api_key_status
+
+	$event_types_config = load_event_types_config('event_types_config.csv') if File.exist?('event_types_config.csv')
+	$devices_config = import_csv('devices_config.csv') if File.exist?('devices_config.csv')
+
+	create_event_types($event_types_config) if File.exist?('event_types_config.csv')
 end
 
+process_config
 
 set :port, 8080
 
@@ -43,7 +42,8 @@ post '/event/by/keyid' do
 	helix_event_type_config = nil # remote helix event type config
 	helix_event_attributes = {} # attributes for payload in create_helix_event request
 	device_id_key = nil # key with the value that maps to device id in devices_config
-	event_types_config.each do |event_type_name, mappings|
+
+	$event_types_config.each do |event_type_name, mappings|
  		event_type_mapping = mappings.find { |mapping| mapping[:data_purpose] == "event type id" }
 		next unless event_type_mapping
 
@@ -51,10 +51,10 @@ post '/event/by/keyid' do
 		event_id_key[event_type_mapping[:remote_key]] = event_type_mapping[:helix_key]
 
 		if body[event_id_key.keys.first] == event_id_key.values.first
-			helix_event_type_config = helix_event_types.select{|et| et[:name] == event_type_name}
+			helix_event_type_config = $helix_event_types.select{|et| et[:name] == event_type_name}
 
 			body.keys.each do |key|
-				config_row = event_types_config[event_type_name].find{|hash| hash[:remote_key] == key}
+				config_row = $event_types_config[event_type_name].find{|hash| hash[:remote_key] == key}
 				device_id_key = config_row[:remote_key] if config_row[:data_purpose] == "device id"
 				next if config_row[:data_type].nil?
 				helix_event_attributes[config_row[:helix_key]] = body[key]
@@ -62,7 +62,7 @@ post '/event/by/keyid' do
 		end
 	end
 
-	camera_id = devices_config.find{|row| row[:device] ==  body[device_id_key]}[:context_camera]
+	camera_id = $devices_config.find{|row| row[:device] ==  body[device_id_key]}[:context_camera]
 
 	result = $vapi.create_helix_event(
 		event_type_uid: helix_event_type_config.first[:event_type_uid],
@@ -95,8 +95,7 @@ post '/config/api-key' do
 		end
 	else
 		File.write('.env', "VERKADA_API_KEY=\"#{key}\"")
-		$api_key_status = check_api_key
-		helix_event_types = $vapi.get_helix_event_types if $api_key_status
+		process_config
 		redirect '/'
 	end
 end
@@ -115,11 +114,8 @@ post '/config/event-types' do
 		if $event_config_message == ["<p>Event types configuration checks passed.</p>"]
 			File.write('event_types_config.csv', params[:config_file][:tempfile].read)
 		end
-
-		$config_message = $event_config_message + $device_config_message
-	  helix_event_types = $vapi.get_helix_event_types if $api_key_status
-          event_types_config = load_event_types_config('event_types_config.csv') if File.exist?('event_types_config.csv')
 	end
+	process_config
 	redirect '/'
 end
 
@@ -139,9 +135,8 @@ post '/config/device-mappings' do
 		end
 
 		$config_message = $event_config_message + $device_config_message
-	  helix_event_types = $vapi.get_helix_event_types if $api_key_status
-          devices_config = import_csv('devices_config.csv') if File.exist?('devices_config.csv')
 	end
+	process_config
 	redirect '/'
 end
 

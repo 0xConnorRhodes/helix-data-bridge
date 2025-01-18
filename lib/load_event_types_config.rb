@@ -1,4 +1,3 @@
-# require_relative 'load_config_csv'
 require 'import_csv'
 
 def load_event_types_config(file)

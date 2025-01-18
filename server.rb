@@ -7,7 +7,7 @@ require_relative 'lib/load_event_types_config'
 require_relative 'lib/check_config_files'
 require_relative 'lib/check_api_key'
 require_relative 'lib/create_event_types'
-
+require 'pry'
 api_key = ENV['VERKADA_API_KEY']
 $vapi = Vapi.new(api_key)
 
@@ -20,12 +20,12 @@ $device_config_message = []
 def process_config
 	$api_key_status = check_api_key
   $org_id = $vapi.get_org_id if $api_key_status
-  $helix_event_types = $vapi.get_helix_event_types if $api_key_status
 
 	$event_types_config = load_event_types_config('event_types_config.csv') if File.exist?('event_types_config.csv')
 	$devices_config = import_csv('devices_config.csv') if File.exist?('devices_config.csv')
 
 	create_event_types($event_types_config) if File.exist?('event_types_config.csv')
+  $helix_event_types = $vapi.get_helix_event_types if $api_key_status
 end
 
 process_config

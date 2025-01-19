@@ -3,10 +3,22 @@ require 'json'
 require 'pry'
 
 hp = HTTParty
+# bad json key
+# motion_body = {
+#   sensorName: "234",
+#   datasource: "Motion"
+# }
 
+# nonexistent sensor
+# motion_body = {
+#   sensorName: "1234",
+#   dataSource: "Motion"
+# }
+
+# nonexistent paired camera
 motion_body = {
   sensorName: "234",
-  datasource: "Motion"
+  dataSource: "Motion"
 }
 
 response = hp.post(
@@ -16,5 +28,6 @@ response = hp.post(
 )
 
 puts "Motion response code: #{response.code}"
+puts response
 
-# binding.pry
+#binding.pry

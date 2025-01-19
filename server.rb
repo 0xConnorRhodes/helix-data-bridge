@@ -48,6 +48,11 @@ post '/event/by/keyid' do
 	helix_event_attributes = {} # attributes for payload in create_helix_event request
 	device_id_key = nil # key with the value that maps to device id in devices_config
 
+	if $event_types_config.nil? || $event_types_config.empty? || $devices_config.nil? || $devices_config.empty?
+		puts "Failed request: Server configuration is missing. Have you uploaded the necessary config files?"
+		halt 400, { error: "Server configuration is missing. Have you uploaded the necessary config files?" }.to_json
+	end
+
 	$event_types_config.each do |event_type_name, mappings|
  		event_type_mapping = mappings.find { |mapping| mapping[:data_purpose] == "event type id" }
 		next unless event_type_mapping
@@ -69,9 +74,9 @@ post '/event/by/keyid' do
 
 	begin
 		camera_id = $devices_config.find{|row| row[:device] ==  body[device_id_key]}[:context_camera]
-	rescue NoMethodError => e
-		puts "Bad request: #{e.message}"
-		puts "request body could not be parsed. It likely contains invalid data."
+	rescue => e
+		puts "Request body could not be parsed. It likely contains invalid data."
+		puts "Please check the key names, and values."
 		puts "Body: #{body}"
 		halt 400, { error: "Bad request" }.to_json
 	end

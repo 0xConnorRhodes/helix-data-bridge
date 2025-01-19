@@ -129,19 +129,15 @@ end
 
 post '/config/device-mappings' do
 	uploaded_file = import_csv(params[:config_file][:tempfile].path)
-	if $api_key_status
-		$config_message = []
-		$device_config_message = []
-		$device_config_message = check_devices_config(uploaded_file)
-
-		if $device_config_message == ["<p>Device mappings configuration checks passed.</p>"]
-			File.write('devices_config.csv', params[:config_file][:tempfile].read)
-		end
-
-		$config_message = $event_config_message + $device_config_message
+	$device_config_message = check_devices_config(uploaded_file)
+	if $device_config_message == ["Device mappings configuration checks passed."]
+		File.write('devices_config.csv', params[:config_file][:tempfile].read)
+		process_config
+		redirect '/'
+	else
+		message = "For more information on the device mappings configuration file, see <a href='/help/device-mappings' target='_blank'>here</a>."
+		redirect "/error?error=#{URI.encode_www_form_component($device_config_message.join(', '))}&message=#{message}"
 	end
-	process_config
-	redirect '/'
 end
 
 get '/help/event-types' do

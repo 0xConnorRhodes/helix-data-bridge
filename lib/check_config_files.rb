@@ -93,7 +93,7 @@ def check_devices_config(config_array)
   actual_columns = config_array.first&.keys&.map(&:to_s)
   
   unless actual_columns == expected_columns
-    message << "<p>DEVICE MAPPING ERROR: Invalid columns in device mappings config. Expected 'Device' and 'Context Camera', got: #{actual_columns.join(', ')}</p>"
+    message << "DEVICE MAPPING ERROR: Invalid columns in device mappings config. Expected 'Device' and 'Context Camera', got: #{actual_columns.join(', ')}"
     return message
   end
 
@@ -101,9 +101,9 @@ def check_devices_config(config_array)
   config_array.each_with_index do |row, index|
     row_number = index + 1
     if row[:device].to_s.strip.empty? || row[:context_camera].to_s.strip.empty?
-      message << "<p>DEVICE MAPPING ERROR: Missing value in row #{row_number}. Both 'Device' and 'Context Camera' must have values.</p>"
+      message << "DEVICE MAPPING ERROR: Missing value in row #{row_number}. Both 'Device' and 'Context Camera' must have values."
     end
   end
 
-  message.any? ? message : ["<p>Device mappings configuration checks passed.</p>"]
+  message.any? ? message : ["Device mappings configuration checks passed."]
 end

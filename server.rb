@@ -33,6 +33,8 @@ end
 get '/error' do
 	@error = params[:error]
 	@message = params[:message]
+	puts "#{@error}"
+	puts "ERROR NOTE: #{@message}"
 	erb :error
 end
 

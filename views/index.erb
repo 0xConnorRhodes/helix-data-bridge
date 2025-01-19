@@ -12,14 +12,8 @@
       <p class="text-warning"><%= "No API key configured. Please configure a key using the link below." %></p>
     <% end %>
 
-    <h3 class="h5 mt-4">Config Check</h3>
-    <% if $config_message.any? %>
-      <%= $config_message.join("\n") %>
-    <% else %>
-      <p class="text-muted"><%= "Configuration will be checked after API key is configured and both configuration files are uploaded. Please upload configuration files after adding your API key." %></p>
-    <% end %>
-
     <h3 class="h5 mt-4">Config Files Added</h3>
+    <p><i>API key must be configured before configuration files can be added.</i></p>
     <ul class="list-group">
       <% if File.exist?('event_types_config.csv') %>
         <li class="list-group-item text-success">Event types config file added.</li>

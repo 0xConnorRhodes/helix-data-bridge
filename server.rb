@@ -7,7 +7,7 @@ require_relative 'lib/load_event_types_config'
 require_relative 'lib/check_config_files'
 require_relative 'lib/check_api_key'
 require_relative 'lib/create_event_types'
-require 'pry'
+
 api_key = ENV['VERKADA_API_KEY']
 $vapi = Vapi.new(api_key)
 

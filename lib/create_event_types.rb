@@ -15,13 +15,12 @@ def create_event_types(config)
   	end
   
     begin
-      result = $vapi.create_helix_event_type(
+      $vapi.create_helix_event_type(
         name: event[0],
         schema: schema
       )
     rescue => e
       if e.message.include?("already exists for organization")
-        # TODO: display error HTML page & ask user to manually delete or edit event type in Command
         puts "Event type \"#{event[0]}\" already exists"
       else
         raise e

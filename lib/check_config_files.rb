@@ -15,13 +15,15 @@ end
 def check_event_config(config_hash)
   helix_event_types = $vapi.get_helix_event_types
 
-  required_keys = ["Remote Key", "Helix Key", "Data Type", "Data Purpose", "Helix Event Type"]
+  required_keys = ["remote_key", "helix_key", "data_type", "data_purpose"]
   
   config_hash.each do |event_type, mappings|
     mappings.each do |mapping|
-      missing_keys = required_keys - mapping.keys.map(&:to_s)
+      missing_keys = required_keys.map(&:to_sym) - mapping.keys
       if missing_keys.any?
-        return "EVENT TYPE ERROR: Missing required keys in config: #{missing_keys.join(', ')}"
+        # style missing keys to match csv convention
+        styled_missing_keys = missing_keys.map(&:to_s).map{|i| i.gsub('_', ' ')}.map{|i| i.split.map(&:capitalize).join(' ')}
+        return "EVENT TYPE ERROR: Missing required keys in config: #{styled_missing_keys.join(', ')}"
       end
     end
   end

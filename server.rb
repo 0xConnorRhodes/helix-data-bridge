@@ -37,7 +37,8 @@ get '/' do
 end
 
 get '/error' do
-	@error_message = params[:message]
+	@error = params[:error]
+	@message = params[:message]
 	erb :error
 end
 
@@ -89,9 +90,12 @@ post '/config/api-key' do
 		$org_id = $vapi.get_org_id
 	rescue => e
 		if e.message == "Failed to get token: 409 - {\"id\": \"dlvp\", \"message\": \"Authentication error\", \"data\": null}"
-			redirect '/error?message=API Authentication failed. Please verify API key and permissions.'
+			error = "API Authentication failed. Please verify API key and permissions."
+			message = 'Your API key should have Read-Only permissions to the Core Command endpoints and Read/Write permissions to the Helix endpoints. For more information on generating an API key, see <a href="https://apidocs.verkada.com/reference/quick-start-guide" target="_blank">here</a>.'
+			redirect "/error?error=#{error}&message=#{message}"
 		else
-			redirect '/error?message=Error: #{e.message}'
+			error = "Error: #{e.message}"
+			redirect "/error?error=#{error}"
 		end
 	else
 		File.write('.env', "VERKADA_API_KEY=\"#{key}\"")

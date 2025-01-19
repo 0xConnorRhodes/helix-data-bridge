@@ -24,7 +24,10 @@ end
 
 process_config
 
-set :port, 8080
+configure do
+	set :port, 8080
+	set :show_exceptions, false
+end
 
 get '/' do
 	erb :index
@@ -64,7 +67,14 @@ post '/event/by/keyid' do
 		end
 	end
 
-	camera_id = $devices_config.find{|row| row[:device] ==  body[device_id_key]}[:context_camera]
+	begin
+		camera_id = $devices_config.find{|row| row[:device] ==  body[device_id_key]}[:context_camera]
+	rescue NoMethodError => e
+		puts "Bad request: #{e.message}"
+		puts "request body could not be parsed. It likely contains invalid data."
+		puts "Body: #{body}"
+		halt 400, { error: "Bad request" }.to_json
+	end
 
 	result = $vapi.create_helix_event(
 		event_type_uid: helix_event_type_config.first[:event_type_uid],

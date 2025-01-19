@@ -36,6 +36,11 @@ get '/' do
 	erb :index
 end
 
+get '/error' do
+	@error_message = params[:message]
+	erb :error
+end
+
 post '/event/by/keyid' do
 	body = JSON.parse(request.body.read)
 
@@ -84,14 +89,9 @@ post '/config/api-key' do
 		$org_id = $vapi.get_org_id
 	rescue => e
 		if e.message == "Failed to get token: 409 - {\"id\": \"dlvp\", \"message\": \"Authentication error\", \"data\": null}"
-			<<~HTML
-				<p>API Authentication failed. Please verify API key and permissions.</p>
-				<a href='/config/api-key'>Back to config page</a>
-			HTML
+			redirect '/error?message=API Authentication failed. Please verify API key and permissions.'
 		else
-			<<~HTML
-				Error: #{e.message}
-			HTML
+			redirect '/error?message=Error: #{e.message}'
 		end
 	else
 		File.write('.env', "VERKADA_API_KEY=\"#{key}\"")

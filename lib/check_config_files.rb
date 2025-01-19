@@ -60,7 +60,7 @@ def check_event_config(config_hash)
   		message << "The remote config schema is:"
   		message << JSON.pretty_generate(JSON.parse(remote_schema.to_json))
   
-  		message << "Please reconcile the event types by modifying the config file or the event type schema in Command. See <a href='https://apidocs.verkada.com/reference/getting-started'>here</a> for more information."
+  		message << "Please reconcile the event types by modifying the config file or the event type schema in Command. See <a href='https://apidocs.verkada.com/reference/getting-started' target='_blank'>here</a> for more information."
   	end
   end
 

@@ -105,5 +105,14 @@ def check_devices_config(config_array)
     end
   end
 
+  cameras = $vapi.get_camera_data
+  cam_ids = cameras.map { |camera| camera[:camera_id] }
+  config_array.each_with_index do |row, index|
+    row_number = index + 1
+    unless cam_ids.include?(row[:context_camera])
+      message << "DEVICE MAPPING ERROR: Invalid camera ID '#{row[:context_camera]}' in row #{row_number}. Camera ID must exist in organization."
+    end
+  end
+
   message.any? ? message : ["Device mappings configuration checks passed."]
 end

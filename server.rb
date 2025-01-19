@@ -98,21 +98,17 @@ post '/config/api-key' do
 	key.strip!
 	$vapi = Vapi.new(key)
 	begin
-		$org_id = $vapi.get_org_id
-	rescue => e
-		if e.message == "Failed to get token: 409 - {\"id\": \"dlvp\", \"message\": \"Authentication error\", \"data\": null}"
-			error = "API Authentication failed. Please verify API key and permissions."
-			message = 'Your API key should have Read-Only permissions to the Core Command endpoints and Read/Write permissions to the Helix endpoints. For more information on generating an API key, see <a href="https://apidocs.verkada.com/reference/quick-start-guide" target="_blank">here</a>.'
-			redirect "/error?error=#{error}&message=#{message}"
-		else
-			error = "Error: #{e.message}"
-			redirect "/error?error=#{error}"
-		end
-	else
-		File.write('.env', "VERKADA_API_KEY=\"#{key}\"")
-		process_config
-		redirect '/'
+    $org_id = $vapi.get_org_id
+    $camera_data = $vapi.get_camera_data(page_size: 1, page_count: 1)
+    $helix_event_types = $vapi.get_helix_event_types
+	rescue
+		error = "API key is invalid or lacks necessary permissions."
+		message = 'Your API key should have Read-Only permissions to the Core Command endpoints, Read-Only permissions to Cameras endpoints, and Read/Write permissions to the Helix endpoints. For more information on generating an API key, see <a href="https://apidocs.verkada.com/reference/quick-start-guide" target="_blank">here</a>.'
+		redirect "/error?error=#{error}&message=#{message}"
 	end
+	File.write('.env', "VERKADA_API_KEY=\"#{key}\"")
+	process_config
+	redirect '/'
 end
 
 get '/config/event-types' do
@@ -145,7 +141,7 @@ post '/config/device-mappings' do
 		redirect '/'
 	else
 		message = "For more information on the device mappings configuration file, see <a href='/help/device-mappings' target='_blank'>here</a>."
-		redirect "/error?error=#{URI.encode_www_form_component($device_config_message.join(', '))}&message=#{message}"
+		redirect "/error?error=#{URI.encode_www_form_component($device_config_message.join('<br>'))}&message=#{message}"
 	end
 end
 

@@ -15,6 +15,17 @@ end
 def check_event_config(config_hash)
   helix_event_types = $vapi.get_helix_event_types
 
+  required_keys = ["Remote Key", "Helix Key", "Data Type", "Data Purpose", "Helix Event Type"]
+  
+  config_hash.each do |event_type, mappings|
+    mappings.each do |mapping|
+      missing_keys = required_keys - mapping.keys.map(&:to_s)
+      if missing_keys.any?
+        return "EVENT TYPE ERROR: Missing required keys in config: #{missing_keys.join(', ')}"
+      end
+    end
+  end
+
   message = []
   data_purpose_check, data_purpose_message = check_data_purpose_field(config_hash)
   message << data_purpose_message unless data_purpose_check

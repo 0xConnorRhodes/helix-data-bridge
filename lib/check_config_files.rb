@@ -1,20 +1,15 @@
 def compare_event_types(local_config:, remote_config:)
   present_events = []
-  missing_events = []
   local_config.each do |local_type, mappings|
   	remote_config.each do |remote_type|
   		if remote_type[:name] == local_type
   			present_events << local_type
-  		else
-  			missing_events << local_type
   		end
   	end
   end
-  missing_events -= present_events
   present_events.uniq!
-  missing_events.uniq!
 
-  return present_events, missing_events
+  return present_events
 end
 
 def check_event_config(config_hash)
@@ -30,7 +25,7 @@ def check_event_config(config_hash)
       .map { |mapping| mapping.reject { |k, v| v.nil? || k == :data_purpose } }
   end
 
-  present_events, missing_events = compare_event_types(
+  present_events = compare_event_types(
   	local_config: sanitized_hash, 
   	remote_config: helix_event_types
   )
@@ -44,30 +39,22 @@ def check_event_config(config_hash)
   	end
   	local_schema.transform_keys!(&:to_sym)
 
-    unless missing_events.empty?
-      message << "<p>EVENT TYPE WARNING: The following event types are missing from remote configuration:<ul>"
-      missing_events.each { |event| message << "<li> #{event}</li>" }
-      message << "</ul>Please run create_helix_event_types.rb to create them.</p>"
-    end
-
   	unless local_schema == remote_schema
-  		message << "<p>EVENT TYPE WARNING: Event type \"#{pres_event}\" already exists, but it does not match the local event type config</p>"
-  		message << "<p>The local config schema is:<br>"
+  		message << "EVENT TYPE WARNING: Event type \"#{pres_event}\" already exists, but it does not match the local event type config"
+  		message << "The local config schema is:"
   		message << JSON.pretty_generate(JSON.parse(local_schema.to_json))
-  		message << "</p>"
   
-  		message << "<p>The remote config schema is:<br>"
+  		message << "The remote config schema is:"
   		message << JSON.pretty_generate(JSON.parse(remote_schema.to_json))
-  		message << "</p>"
   
-  		message << "<p>If you want to overwrite the remote schema with the local schema, run create_helix_event_types.rb</p>"
+  		message << "Please reconcile the event types by modifying the config file or the event type schema in Command. See <a href='https://apidocs.verkada.com/reference/getting-started'>here</a> for more information."
   	end
   end
 
   if message.any?
     message.uniq!
-    message = message.select { |m| m.start_with?("<p>EVENT TYPE ERROR: Invalid data_purpose") } if message.any? { |m| m.start_with?("<p>EVENT TYPE ERROR: Invalid data_purpose") }
-    return message
+    message = message.select { |m| m.start_with?("EVENT TYPE ERROR: Invalid data_purpose") } if message.any? { |m| m.start_with?("EVENT TYPE ERROR: Invalid data_purpose") }
+    return message.join("\n")
   else
     return "Event types configuration checks passed."
   end
@@ -78,7 +65,7 @@ def check_data_purpose_field(config_hash)
   config_hash.each do |event_type, mappings|
     mappings.each do |mapping|
       unless valid_data_purposes.include?(mapping[:data_purpose])
-        message =  "<p>EVENT TYPE ERROR: Invalid data_purpose '#{mapping[:data_purpose]}' for event type '#{event_type}'</p>"
+        message =  "EVENT TYPE ERROR: Invalid data_purpose '#{mapping[:data_purpose]}' for event type '#{event_type}'"
         return false, message
       end
     end

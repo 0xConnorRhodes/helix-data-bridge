@@ -11,12 +11,6 @@ require 'pry'
 api_key = ENV['VERKADA_API_KEY']
 $vapi = Vapi.new(api_key)
 
-# TODO: simplify config messages since you're always sending the create event post
-# TODO: factor process-config code into a function, run that function on startup & on each config upload
-$config_message = []
-$event_config_message = []
-$device_config_message = []
-
 def process_config
 	$api_key_status = check_api_key
   $org_id = $vapi.get_org_id if $api_key_status
@@ -110,17 +104,15 @@ end
 
 post '/config/event-types' do
 	uploaded_file = load_event_types_config(params[:config_file][:tempfile].path)
-	if $api_key_status
-		$config_message = []
-		$event_config_message = []
-		$event_config_message = check_event_config(uploaded_file)
-
-		if $event_config_message == ["<p>Event types configuration checks passed.</p>"]
-			File.write('event_types_config.csv', params[:config_file][:tempfile].read)
-		end
+	$event_config_message = check_event_config(uploaded_file)
+	if $event_config_message == "Event types configuration checks passed."
+		File.write('event_types_config.csv', params[:config_file][:tempfile].read)
+		process_config
+		redirect '/'
+	else
+		message = "For more information on the event types configuration file, see <a href='/help/event-types' target='_blank'>here</a>."
+		redirect "/error?error=#{URI.encode_www_form_component($event_config_message)}&message=#{message}"
 	end
-	process_config
-	redirect '/'
 end
 
 get '/config/device-mappings' do

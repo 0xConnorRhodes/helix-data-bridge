@@ -1,4 +1,4 @@
-name: Create and publish Helix Data Bridge Image
+name: Create and publish container image
 
 on:
   push:

@@ -25,7 +25,9 @@ end
 process_config
 
 configure do
-	set :port, 8080
+	set :bind, '0.0.0.0'
+	set :port, 80
+	set :environment, :production
 	set :show_exceptions, false
 end
 

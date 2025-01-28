@@ -1,0 +1,30 @@
+FROM ruby:3.4.1-alpine
+
+RUN apk add --no-cache \
+    git \
+    build-base
+
+RUN git clone https://github.com/0xConnorRhodes/ruby-modules.git /tmp/ruby-modules && \
+    find /tmp/ruby-modules -type f ! -name "*.rb" -delete && \
+    cp -r /tmp/ruby-modules/* /usr/local/lib/ruby/site_ruby/ && \
+    rm -rf /tmp/ruby-modules
+
+
+RUN git clone https://github.com/0xConnorRhodes/verkada-api-rb.git /tmp/ruby-vapi && \
+    find /tmp/ruby-vapi -type f ! -name "*.rb" -delete && \
+    cp -r /tmp/ruby-vapi/* /usr/local/lib/ruby/site_ruby/ && \
+    rm -rf /tmp/ruby-vapi
+
+WORKDIR /app
+COPY Gemfile .
+RUN bundle install
+
+COPY ../lib/ /app/lib/
+COPY ../public/ /app/public/
+COPY ../views/ /app/views/
+COPY ../server.rb /app/
+
+
+RUN apk del \
+    git \
+    build-base

@@ -6,4 +6,4 @@ build:
 	docker build -t helix-dev -f deploy/Containerfile .
 
 run:
-	docker run -it --rm  helix-dev /bin/sh
+	docker run -it --rm -p 80:80 helix-dev /bin/sh

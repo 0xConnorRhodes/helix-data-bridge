@@ -6,6 +6,9 @@ services:
     expose:
       - "80"
     restart: unless-stopped
+    environment:
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=changeme
 
   caddy:
     image: caddy:latest

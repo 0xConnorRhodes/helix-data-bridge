@@ -3,18 +3,9 @@ services:
     image: ghcr.io/0xconnorrhodes/helix-data-bridge:latest
     hostname: helix_bridge
     container_name: helix_bridge
-    expose:
-      - "80"
-    restart: unless-stopped
-
-  caddy:
-    image: caddy:latest
-    hostname: caddy
-    container_name: caddy
     ports:
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
+      - "80:80"
     restart: unless-stopped
-    depends_on:
-      - helix_bridge
+    environment:
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=changeme

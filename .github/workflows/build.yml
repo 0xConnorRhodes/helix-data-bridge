@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'deploy/Containerfile'
+      - 'deploy/container-build/Containerfile'
       - 'lib/**'
       - 'public/**'
       - 'views/**'
@@ -14,7 +14,7 @@ on:
     branches:
       - main
     paths:
-      - 'deploy/Containerfile'
+      - 'deploy/container-build/Containerfile'
       - 'lib/**'
       - 'public/**'
       - 'views/**'
@@ -61,7 +61,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: deploy/Containerfile
+          file: deploy/container-build/Containerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

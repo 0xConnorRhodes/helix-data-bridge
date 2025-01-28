@@ -25,6 +25,6 @@ COPY ../views/ /app/views/
 COPY ../server.rb /app/
 
 
-RUN apk del \
-    git \
-    build-base
+# RUN apk del \
+#     git \
+#     build-base

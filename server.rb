@@ -31,10 +31,8 @@ configure do
 	set :show_exceptions, false
 end
 
-# Add authentication helpers
 helpers do
   def protected!
-    # Skip auth for /event routes
     return if request.path_info.start_with?('/event')
     
     unless authorized?

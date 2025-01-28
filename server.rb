@@ -31,6 +31,30 @@ configure do
 	set :show_exceptions, false
 end
 
+# Add authentication helpers
+helpers do
+  def protected!
+    # Skip auth for /event routes
+    return if request.path_info.start_with?('/event')
+    
+    unless authorized?
+      response['WWW-Authenticate'] = %(Basic realm="Restricted Area")
+      halt 401, "Not authorized\n"
+    end
+  end
+
+  def authorized?
+    @auth ||= Rack::Auth::Basic::Request.new(request.env)
+    @auth.provided? && @auth.basic? && @auth.credentials && 
+    @auth.credentials == [ENV['ADMIN_USERNAME'], ENV['ADMIN_PASSWORD']]
+  end
+end
+
+# Add before filter for all routes
+before do
+  protected!
+end
+
 get '/' do
 	erb :index
 end

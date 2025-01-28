@@ -9,7 +9,7 @@ motion_body = {
 }
 
 motion_post = hp.post(
-  'http://localhost:8080/event/by/keyid',
+  'http://localhost:80/event/by/keyid',
   headers: { 'content-type' => 'application/json' },
   body: motion_body.to_json
 )
@@ -20,7 +20,7 @@ tamper_body = {
 }
 
 tamper_post = hp.post(
-  'http://localhost:8080/event/by/keyid',
+  'http://localhost:80/event/by/keyid',
   headers: { 'Content-Type' => 'application/json' }, 
   body: tamper_body.to_json
 )

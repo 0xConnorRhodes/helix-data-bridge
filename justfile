@@ -2,11 +2,18 @@ reset:
 	ruby tests/reset_state.rb
 	ruby server.rb
 
-local-build:
-	docker build -t helix-dev -f deploy/Containerfile .
+build:
+	docker build -t helix-dev -f deploy/container-build/Containerfile .
 
-local-run:
-	docker run -it --rm -p 80:80 helix-dev /bin/sh
+run:
+    docker run -d --name helix \
+    -p 80:80 \
+    -e ADMIN_USERNAME=admin \
+    -e ADMIN_PASSWORD=changeme \
+    helix-dev
+
+exec:
+	docker exec -it helix /bin/sh
 
 pull-test:
 	docker pull ghcr.io/0xconnorrhodes/helix-data-bridge:latest

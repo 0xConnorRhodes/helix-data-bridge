@@ -90,7 +90,7 @@ post '/event/by/keyid' do
 			body.keys.each do |key|
 				config_row = $event_types_config[event_type_name].find{|hash| hash[:remote_key] == key}
 				device_id_key = config_row[:remote_key] if config_row[:data_purpose] == "device id"
-				next if config_row[:data_type].nil?
+				next if config_row[:data_type].nil? || config_row[:data_type].start_with?("time")
 				helix_event_attributes[config_row[:helix_key]] = body[key]
 			end
 		end

@@ -3,9 +3,10 @@ def create_event_types(config)
   exit(1) unless data_purpose_check
   
   # remove fields from config that are not used in the Helix schema
+  excluded_purposes = ["event type id", "timestamp"]
   stripped_config = config.transform_values do |mappings|
     mappings
-      .reject { |mapping| mapping[:data_purpose] == "event type id" }
+      .reject { |mapping| excluded_purposes.include?(mapping[:data_purpose]) }
       .map { |mapping| mapping.reject { |k, v| v.nil? || k == :data_purpose } }
   end
   

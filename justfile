@@ -3,7 +3,7 @@ reset:
 	ruby server.rb
 
 local-build:
-	docker build -t helix-dev -f deploy/Containerfile .
+	docker build -t helix-dev -f deploy/container-build/Containerfile .
 
 local-run:
 	docker run -it --rm -p 80:80 helix-dev /bin/sh

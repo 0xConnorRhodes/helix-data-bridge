@@ -1,6 +1,4 @@
-FROM ruby:3.4.1-alpine AS base
-
-FROM base AS build
+FROM ruby:3.4.1-alpine
 
 RUN apk add --no-cache \
     git \
@@ -24,11 +22,5 @@ COPY ../lib/ /app/lib/
 COPY ../public/ /app/public/
 COPY ../views/ /app/views/
 COPY ../server.rb /app/
-
-FROM base
-
-COPY --from=build /usr/local/bundle /usr/local/bundle
-COPY --from=build /usr/local/lib/ruby/site_ruby/ /usr/local/lib/ruby/site_ruby/
-COPY --from=build /app /app
 
 CMD ["ruby", "/app/server.rb"]

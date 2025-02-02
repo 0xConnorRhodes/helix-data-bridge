@@ -6,11 +6,14 @@ build:
 	docker build -t helix-dev -f deploy/container-build/Containerfile .
 
 run:
-    docker run -d --name helix \
-    -p 80:80 \
-    -e ADMIN_USERNAME=admin \
-    -e ADMIN_PASSWORD=changeme \
-    helix-dev
+	docker run -it --rm \
+	--name helix \
+	--hostname helix \
+	-p 80:80 \
+	-v "$(pwd)/.env:/app/.env" \
+	-v "$(pwd)/devices_config.csv:/app/devices_config.csv" \
+	-v "$(pwd)/event_types_config.csv:/app/event_types_config.csv" \
+	helix-dev
 
 exec:
 	docker exec -it helix /bin/sh

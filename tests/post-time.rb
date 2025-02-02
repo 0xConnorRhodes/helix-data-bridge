@@ -10,7 +10,7 @@ time_body = {
 }
 
 time_post = hp.post(
-  'http://192.168.86.97/event/by/keyid',
+  'http://127.0.0.1/event/by/keyid',
   headers: { 'Content-Type' => 'application/json' },
   body: time_body.to_json
 )

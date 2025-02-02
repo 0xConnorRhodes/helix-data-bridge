@@ -2,7 +2,8 @@ FROM ruby:3.4.1-alpine
 
 RUN apk add --no-cache \
     git \
-    build-base
+    build-base \
+    tzdata
 
 RUN git clone https://github.com/0xConnorRhodes/ruby-modules.git /tmp/ruby-modules && \
     find /tmp/ruby-modules -type f ! -name "*.rb" -delete && \

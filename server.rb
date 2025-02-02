@@ -1,12 +1,16 @@
 require 'sinatra'
-require 'vapi'
 require 'dotenv/load'
 require 'json'
+require 'time'
+require 'tzinfo'
+require 'vapi'
 require 'import_csv'
 require_relative 'lib/load_event_types_config'
 require_relative 'lib/check_config_files'
 require_relative 'lib/check_api_key'
 require_relative 'lib/create_event_types'
+require_relative 'lib/timezone'
+require 'pry'
 
 api_key = ENV['VERKADA_API_KEY']
 $vapi = Vapi.new(api_key)
@@ -20,6 +24,8 @@ def process_config
 
 	create_event_types($event_types_config) if File.exist?('event_types_config.csv')
   $helix_event_types = $vapi.get_helix_event_types if $api_key_status
+
+	$machine_timezone = get_machine_timezone
 end
 
 process_config
@@ -94,6 +100,32 @@ post '/event/by/keyid' do
 				helix_event_attributes[config_row[:helix_key]] = body[key]
 			end
 		end
+
+		# parse timeformat
+		time_fmt = $event_types_config[event_type_name].select { |h| h[:data_purpose] == "timestamp" }.first&.dig(:data_type)
+
+		if time_fmt
+			if time_fmt.include?(":")
+				_, timezone = time_fmt.split(":")
+			else
+				puts "No timezone in request: #{body}"
+				puts "Using timezone: #{$machine_timezone} from local machine"
+				timezone = $machine_timezone
+			end
+			# TODO: move the error handling code for timestamp parsing to here
+			# and ensure it exits and defaults to unix_time = nil
+			parsed_time = Time.parse(body["time"])
+			tz = TZInfo::Timezone.get(timezone)
+
+			local_time = tz.local_time(parsed_time.year, 
+												parsed_time.month, parsed_time.day, 
+												parsed_time.hour, parsed_time.min, 
+												parsed_time.sec)
+
+			unix_time = local_time.to_i
+		end
+
+		binding.pry
 	end
 
 	begin
@@ -104,6 +136,15 @@ post '/event/by/keyid' do
 		puts "Body: #{body}"
 		halt 400, { error: "Bad request" }.to_json
 	end
+
+	# begin
+	# 	# timestamp parse
+	# rescue => e
+	# 	puts "Timestamp could not be parsed. It likely contains invalid data."
+	# 	puts "Please check the key names, and values."
+	# 	puts "Body: #{body}"
+	# 	halt 400, { error: "Bad request" }.to_json
+	# end
 
 	result = $vapi.create_helix_event(
 		event_type_uid: helix_event_type_config.first[:event_type_uid],

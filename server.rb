@@ -108,24 +108,31 @@ post '/event/by/keyid' do
 			if time_fmt.include?(":")
 				_, timezone = time_fmt.split(":")
 			else
-				puts "No timezone in request: #{body}"
-				puts "Using timezone: #{$machine_timezone} from local machine"
+				puts "No timezone in server config. Using timezone: #{$machine_timezone} from local machine"
 				timezone = $machine_timezone
 			end
-			# TODO: move the error handling code for timestamp parsing to here
-			# and ensure it exits and defaults to unix_time = nil
-			parsed_time = Time.parse(body["time"])
-			tz = TZInfo::Timezone.get(timezone)
 
-			local_time = tz.local_time(parsed_time.year, 
-												parsed_time.month, parsed_time.day, 
-												parsed_time.hour, parsed_time.min, 
-												parsed_time.sec)
+			begin
+				if body["time"].to_s.match?(/^\d{10}$/)
+					unix_time = body["time"].to_i
+				else
+					parsed_time = Time.parse(body["time"])
+					tz = TZInfo::Timezone.get(timezone)
 
-			unix_time = local_time.to_i
+					local_time = tz.local_time(parsed_time.year, 
+														parsed_time.month, parsed_time.day, 
+														parsed_time.hour, parsed_time.min, 
+														parsed_time.sec)
+
+					unix_time = local_time.to_i
+				end
+			rescue => e
+				puts "Timestamp could not be parsed. It likely contains invalid data."
+				puts "Please check the key names, and values."
+				puts "Body: #{body}"
+				halt 400, { error: "Bad request" }.to_json
+			end
 		end
-
-		binding.pry
 	end
 
 	begin
@@ -136,15 +143,6 @@ post '/event/by/keyid' do
 		puts "Body: #{body}"
 		halt 400, { error: "Bad request" }.to_json
 	end
-
-	# begin
-	# 	# timestamp parse
-	# rescue => e
-	# 	puts "Timestamp could not be parsed. It likely contains invalid data."
-	# 	puts "Please check the key names, and values."
-	# 	puts "Body: #{body}"
-	# 	halt 400, { error: "Bad request" }.to_json
-	# end
 
 	result = $vapi.create_helix_event(
 		event_type_uid: helix_event_type_config.first[:event_type_uid],

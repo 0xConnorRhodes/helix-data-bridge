@@ -3,10 +3,12 @@ require 'json'
 
 hp = HTTParty
 
+time = Time.now.strftime("%I:%M:%S %p")
+
 time_body = {
   location: "Lab_Halo",
   event: "Tamper", 
-  time: Time.now.strftime("%I:%M:%S %p")
+  time: time
 }
 
 time_post = hp.post(
@@ -15,4 +17,5 @@ time_post = hp.post(
   body: time_body.to_json
 )
 
+puts "Time: #{time}"
 puts "Time event response code: #{time_post.code}"

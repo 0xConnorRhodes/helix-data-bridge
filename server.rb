@@ -83,6 +83,9 @@ post '/event/by/keyid' do
 		halt 400, { error: "Server configuration is missing. Have you uploaded the necessary config files?" }.to_json
 	end
 
+	# set unix_time to current time. Var will be remapped with custom value if specified
+	unix_time = (Time.now.to_f * 1000).round
+
 	$event_types_config.each do |event_type_name, mappings|
  		event_type_mapping = mappings.find { |mapping| mapping[:data_purpose] == "event type id" }
 		next unless event_type_mapping
@@ -113,7 +116,13 @@ post '/event/by/keyid' do
 			end
 
 			begin
-				if body["time"].to_s.match?(/^\d{10}$/)
+				time_str = body["time"].to_s.strip
+
+				if time_str.empty?
+					next
+				elsif body["time"].to_s.match?(/^\d{10}$/)
+					unix_time = body["time"].to_i * 1000
+				elsif body["time"].to_s.match?(/^\d{13}$/)
 					unix_time = body["time"].to_i
 				else
 					parsed_time = Time.parse(body["time"])
@@ -124,9 +133,10 @@ post '/event/by/keyid' do
 														parsed_time.hour, parsed_time.min, 
 														parsed_time.sec)
 
-					unix_time = local_time.to_i
+					unix_time = (local_time.to_f * 1000).round
 				end
 			rescue => e
+				puts "Error: #{e}"
 				puts "Timestamp could not be parsed. It likely contains invalid data."
 				puts "Please check the key names, and values."
 				puts "Body: #{body}"
@@ -148,6 +158,7 @@ post '/event/by/keyid' do
 		event_type_uid: helix_event_type_config.first[:event_type_uid],
 		camera_id: camera_id,
 		attributes: helix_event_attributes,
+		time: unix_time
 	)
 	return result
 end

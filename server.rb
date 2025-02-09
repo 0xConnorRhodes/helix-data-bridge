@@ -104,22 +104,19 @@ post '/event/by/keyid' do
 		end
 
 		# parse timeformat
-		# time_config = time_fmt = $event_types_config[event_type_name].select { |h| h[:data_purpose] == "timestamp" }.first
-		# time_key = time_config[:remote_key]
-		# time_fmt = time_config&.dig(:data_type)
-		time_fmt = $event_types_config[event_type_name].select { |h| h[:data_purpose] == "timestamp" }.first&.dig(:data_type)
-
-		# binding.pry
+		time_config = time_fmt = $event_types_config[event_type_name].select { |h| h[:data_purpose] == "timestamp" }.first
+		time_key = time_config[:remote_key]
+		time_fmt = time_config&.dig(:data_type)
 
 		unix_time = nil
 		if time_fmt && time_fmt.include?(":")
 				_, timezone = time_fmt.split(":")
 				ENV["TZ"] = timezone
-				unix_time = Time.parse(body["time"]).to_i
+				unix_time = Time.parse(body[time_key]).to_i
 		else
 			puts "No timezone in server config. Using timezone: #{$machine_timezone} from local machine"
 			ENV["TZ"] = $machine_timezone
-			unix_time = Time.parse(body["time"]).to_i
+			unix_time = Time.parse(body[time_key]).to_i
 		end
 	end
 

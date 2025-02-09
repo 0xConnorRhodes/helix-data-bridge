@@ -108,41 +108,48 @@ post '/event/by/keyid' do
 		time_fmt = $event_types_config[event_type_name].select { |h| h[:data_purpose] == "timestamp" }.first&.dig(:data_type)
 
 		if time_fmt
-			if time_fmt.include?(":")
-				_, timezone = time_fmt.split(":")
-			else
-				puts "No timezone in server config. Using timezone: #{$machine_timezone} from local machine"
-				timezone = $machine_timezone
-			end
-
-			begin
-				time_str = body["time"].to_s.strip
-
-				if time_str.empty?
-					next
-				elsif body["time"].to_s.match?(/^\d{10}$/)
-					unix_time = body["time"].to_i * 1000
-				elsif body["time"].to_s.match?(/^\d{13}$/)
-					unix_time = body["time"].to_i
-				else
-					parsed_time = Time.parse(body["time"])
-					tz = TZInfo::Timezone.get(timezone)
-
-					local_time = tz.local_time(parsed_time.year, 
-														parsed_time.month, parsed_time.day, 
-														parsed_time.hour, parsed_time.min, 
-														parsed_time.sec)
-
-					unix_time = (local_time.to_f * 1000).round
-				end
-			rescue => e
-				puts "Error: #{e}"
-				puts "Timestamp could not be parsed. It likely contains invalid data."
-				puts "Please check the key names, and values."
-				puts "Body: #{body}"
-				halt 400, { error: "Bad request" }.to_json
-			end
+			# unix_time = parse_time
+			unix_time = (Time.now.to_f * 1000).round
+		else
+			unix_time = (Time.now.to_f * 1000).round
 		end
+
+		# if time_fmt
+		# 	if time_fmt.include?(":")
+		# 		_, timezone = time_fmt.split(":")
+		# 	else
+		# 		puts "No timezone in server config. Using timezone: #{$machine_timezone} from local machine"
+		# 		timezone = $machine_timezone
+		# 	end
+
+		# 	begin
+		# 		time_str = body["time"].to_s.strip
+
+		# 		if time_str.empty?
+		# 			next
+		# 		elsif body["time"].to_s.match?(/^\d{10}$/)
+		# 			unix_time = body["time"].to_i * 1000
+		# 		elsif body["time"].to_s.match?(/^\d{13}$/)
+		# 			unix_time = body["time"].to_i
+		# 		else
+		# 			parsed_time = Time.parse(body["time"])
+		# 			tz = TZInfo::Timezone.get(timezone)
+
+		# 			local_time = tz.local_time(parsed_time.year, 
+		# 												parsed_time.month, parsed_time.day, 
+		# 												parsed_time.hour, parsed_time.min, 
+		# 												parsed_time.sec)
+
+		# 			unix_time = (local_time.to_f * 1000).round
+		# 		end
+		# 	rescue => e
+		# 		puts "Error: #{e}"
+		# 		puts "Timestamp could not be parsed. It likely contains invalid data."
+		# 		puts "Please check the key names, and values."
+		# 		puts "Body: #{body}"
+		# 		halt 400, { error: "Bad request" }.to_json
+		# 	end
+		# end
 	end
 
 	begin

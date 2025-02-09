@@ -84,7 +84,13 @@ post '/event/by/keyid' do
 
 	unix_time = nil
 	$event_types_config.each do |event_type_name, mappings|
+		# 1. if event type has an each block, test if matches, if it does, break
+		# if no event type, then check if metric, break once match
  		event_type_mapping = mappings.find { |mapping| mapping[:data_purpose] == "event type id" }
+		if event_type_mapping
+		else
+			# metric code goes here
+		end
 		next unless event_type_mapping
 
 		id_pair = {} # key:value from event_types_config that identifies this particular event type

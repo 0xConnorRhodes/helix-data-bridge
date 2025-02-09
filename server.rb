@@ -82,17 +82,18 @@ post '/event/by/keyid' do
 		halt 400, { error: "Server configuration is missing. Have you uploaded the necessary config files?" }.to_json
 	end
 
-	# set unix_time to current time. Var will be remapped with custom value if specified
-	unix_time = (Time.now.to_f * 1000).round
-
+	unix_time = nil
 	$event_types_config.each do |event_type_name, mappings|
  		event_type_mapping = mappings.find { |mapping| mapping[:data_purpose] == "event type id" }
 		next unless event_type_mapping
 
-		event_id_key = {} # key which identifies which Helix event type this is a request for
-		event_id_key[event_type_mapping[:remote_key]] = event_type_mapping[:helix_key]
+		id_pair = {} # key:value from event_types_config that identifies this particular event type
+		id_pair[event_type_mapping[:remote_key]] = event_type_mapping[:helix_key]
 
-		if body[event_id_key.keys.first] == event_id_key.values.first
+		# next unless event_type_id key:value in the body matches this event type
+		next unless id_pair.all? { |key, value| body[key] == value }
+
+		if body[id_pair.keys.first] == id_pair.values.first
 			helix_event_type_config = $helix_event_types.select{|et| et[:name] == event_type_name}
 
 			body.keys.each do |key|
@@ -103,20 +104,23 @@ post '/event/by/keyid' do
 			end
 		end
 
-		# parse timeformat
-		time_config = time_fmt = $event_types_config[event_type_name].select { |h| h[:data_purpose] == "timestamp" }.first
-		time_key = time_config[:remote_key]
-		time_fmt = time_config&.dig(:data_type)
+		# if the active event type has a timestamp field specified
+		if mappings.any? { |hash| hash[:data_purpose] == "timestamp" }
+			time_config = $event_types_config[event_type_name].select { |h| h[:data_purpose] == "timestamp" }.first
+			time_key = time_config[:remote_key]
+			time_fmt = time_config&.dig(:data_type)
 
-		unix_time = nil
-		if time_fmt && time_fmt.include?(":")
-				_, timezone = time_fmt.split(":")
-				ENV["TZ"] = timezone
+			if time_fmt.include?(":")
+					_, timezone = time_fmt.split(":")
+					ENV["TZ"] = timezone
+					unix_time = Time.parse(body[time_key]).to_i
+			else
+				puts "No timezone in server config. Using timezone: #{$machine_timezone} from local machine"
+				ENV["TZ"] = $machine_timezone
 				unix_time = Time.parse(body[time_key]).to_i
+			end
 		else
-			puts "No timezone in server config. Using timezone: #{$machine_timezone} from local machine"
-			ENV["TZ"] = $machine_timezone
-			unix_time = Time.parse(body[time_key]).to_i
+			unix_time = Time.now.to_i
 		end
 	end
 

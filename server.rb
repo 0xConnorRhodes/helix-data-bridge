@@ -9,6 +9,7 @@ require_relative 'lib/check_config_files'
 require_relative 'lib/check_api_key'
 require_relative 'lib/create_event_types'
 require_relative 'lib/timezone'
+require_relative 'lib/generate_event_timestamp'
 require 'pry'
 
 api_key = ENV['VERKADA_API_KEY']
@@ -84,22 +85,14 @@ post '/event/by/keyid' do
 
 	unix_time = nil
 	$event_types_config.each do |event_type_name, mappings|
-		# 1. if event type has an each block, test if matches, if it does, break
-		# if no event type, then check if metric, break once match
  		event_type_mapping = mappings.find { |mapping| mapping[:data_purpose] == "event type id" }
 		if event_type_mapping
-		else
-			# metric code goes here
-		end
-		next unless event_type_mapping
+			id_pair = {} # key:value from event_types_config that identifies this particular event type
+			id_pair[event_type_mapping[:remote_key]] = event_type_mapping[:helix_key]
 
-		id_pair = {} # key:value from event_types_config that identifies this particular event type
-		id_pair[event_type_mapping[:remote_key]] = event_type_mapping[:helix_key]
+			# next unless event_type_id key:value in the body matches this event type
+			next unless id_pair.all? { |key, value| body[key] == value }
 
-		# next unless event_type_id key:value in the body matches this event type
-		next unless id_pair.all? { |key, value| body[key] == value }
-
-		if body[id_pair.keys.first] == id_pair.values.first
 			helix_event_type_config = $helix_event_types.select{|et| et[:name] == event_type_name}
 
 			body.keys.each do |key|
@@ -108,25 +101,13 @@ post '/event/by/keyid' do
 				next if config_row[:data_type].nil? || config_row[:data_type].start_with?("time")
 				helix_event_attributes[config_row[:helix_key]] = body[key]
 			end
-		end
-
-		# if the active event type has a timestamp field specified
-		if mappings.any? { |hash| hash[:data_purpose] == "timestamp" }
-			time_config = $event_types_config[event_type_name].select { |h| h[:data_purpose] == "timestamp" }.first
-			time_key = time_config[:remote_key]
-			time_fmt = time_config&.dig(:data_type)
-
-			if time_fmt.include?(":")
-					_, timezone = time_fmt.split(":")
-					ENV["TZ"] = timezone
-					unix_time = Time.parse(body[time_key]).to_i
-			else
-				puts "No timezone in server config. Using timezone: #{$machine_timezone} from local machine"
-				ENV["TZ"] = $machine_timezone
-				unix_time = Time.parse(body[time_key]).to_i
-			end
+			unix_time = generate_event_timestamp(event_type_name, mappings, body)
+			break
 		else
-			unix_time = Time.now.to_i
+			# TODO: metric code goes here
+			# if no event type, then check if metric, break once match
+			unix_time = generate_event_timestamp(event_type_name, mappings, body)
+			break
 		end
 	end
 

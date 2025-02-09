@@ -6,5 +6,4 @@ gem "json", "~> 2.9"
 gem "dotenv", "~> 3.1"
 gem "rackup", "~> 2.2"
 gem "puma", "~> 6.5"
-gem "tzinfo", "~> 2.0"
 gem "pry", "~> 0.15.2", :group => :development

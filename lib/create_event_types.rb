@@ -12,7 +12,7 @@ def create_event_types(config)
   
   stripped_config.each do |event|
   	schema = event[1].each_with_object({}) do |mapping, schema|
-  		schema[mapping[:helix_key]] = mapping[:data_type]
+  		schema[mapping[:helix_key]] = mapping[:data_type] if mapping[:helix_key]
   	end
   
     begin

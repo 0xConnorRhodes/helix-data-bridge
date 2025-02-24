@@ -74,8 +74,6 @@ end
 post '/event/by/keyid' do
 	body = JSON.parse(request.body.read)
 
-	helix_event_attributes = {} # attributes for payload in create_helix_event request
-
 	if $event_types_config.nil? || $event_types_config.empty? || $devices_config.nil? || $devices_config.empty?
 		puts "Failed request: Server configuration is missing. Have you uploaded the necessary config files?"
 		halt 400, { error: "Server configuration is missing. Have you uploaded the necessary config files?" }.to_json
@@ -103,6 +101,7 @@ post '/event/by/keyid' do
 	event_type_mapping = $event_types_config[et_name]
 	device_id_key = event_type_mapping.select {|i| i[:data_purpose] == "device id"}&.first[:remote_key] # key with the value that maps to device id in devices_config
 
+	helix_event_attributes = {} # attributes for payload in create_helix_event request
 	body.keys.each do |key|
 		config_row = $event_types_config[et_name].find{|hash| hash[:remote_key] == key}
 		next if config_row[:data_type].nil? || config_row[:data_type].start_with?("time")

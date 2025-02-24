@@ -74,42 +74,42 @@ end
 post '/event/by/keyid' do
 	body = JSON.parse(request.body.read)
 
-	helix_event_type_config = nil # remote helix event type config
 	helix_event_attributes = {} # attributes for payload in create_helix_event request
-	device_id_key = nil # key with the value that maps to device id in devices_config
 
 	if $event_types_config.nil? || $event_types_config.empty? || $devices_config.nil? || $devices_config.empty?
 		puts "Failed request: Server configuration is missing. Have you uploaded the necessary config files?"
 		halt 400, { error: "Server configuration is missing. Have you uploaded the necessary config files?" }.to_json
 	end
 
-	unix_time = nil
-	$event_types_config.each do |event_type_name, mappings|
- 		event_type_mapping = mappings.find { |mapping| mapping[:data_purpose] == "event type id" }
-		if event_type_mapping
-			id_pair = {} # key:value from event_types_config that identifies this particular event type
-			id_pair[event_type_mapping[:remote_key]] = event_type_mapping[:helix_key]
+	event_types_by_id = $event_types_config.values.flatten.select {|i| i[:data_purpose] == "event type id"}
 
-			# next unless event_type_id key:value in the body matches this event type
-			next unless id_pair.all? { |key, value| body[key] == value }
-
-			helix_event_type_config = $helix_event_types.select{|et| et[:name] == event_type_name}
-
-			body.keys.each do |key|
-				config_row = $event_types_config[event_type_name].find{|hash| hash[:remote_key] == key}
-				device_id_key = config_row[:remote_key] if config_row[:data_purpose] == "device id"
-				next if config_row[:data_type].nil? || config_row[:data_type].start_with?("time")
-				helix_event_attributes[config_row[:helix_key]] = body[key]
-			end
-			unix_time = generate_event_timestamp(event_type_name, mappings, body)
-			break
-		else
-			# TODO: metric code goes here
-			# if no event type, then check if metric, break once match
-			unix_time = generate_event_timestamp(event_type_name, mappings, body)
-			break
+	# unique data that identifies the event type ("event type id" or "metric")
+	event_type_id = event_types_by_id.find do |et|
+		body.any? {|k, v| et.values.include?(k) && et.values.include?(v)}
+	end
+	if event_type_id.nil?
+		event_types_by_metric = $event_types_config.values.flatten.select {|i| i[:data_purpose] == "metric"}
+		event_type_id = event_types_by_metric.find do |et|
+			body.any? {|k, _| et.values.include?(k)}
 		end
 	end
+	if event_type_id.nil?
+		puts "Could not identify even type based on data in body: #{body}"
+		halt 500, { error: "Could not identify event type based on data in body"}.to_json
+	end
+
+	et_name = $event_types_config.find {|_key, arr| arr.include?(event_type_id)}&.first
+	helix_event_type_config = $helix_event_types.select {|i| i[:name] == et_name} # remote helix event type config
+	event_type_mapping = $event_types_config[et_name]
+	device_id_key = event_type_mapping.select {|i| i[:data_purpose] == "device id"}&.first[:remote_key] # key with the value that maps to device id in devices_config
+
+	body.keys.each do |key|
+		config_row = $event_types_config[et_name].find{|hash| hash[:remote_key] == key}
+		next if config_row[:data_type].nil? || config_row[:data_type].start_with?("time")
+		helix_event_attributes[config_row[:helix_key]] = body[key]
+	end
+
+	unix_time = generate_event_timestamp(et_name, event_type_mapping, body)
 
 	begin
 		camera_id = $devices_config.find{|row| row[:device] ==  body[device_id_key]}[:context_camera]

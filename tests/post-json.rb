@@ -8,15 +8,15 @@ motion_body = {
   dataSource: "Motion"
 }
 
-motion_post = hp.post(
-  'http://localhost:80/event/by/keyid',
-  headers: { 'content-type' => 'application/json' },
-  body: motion_body.to_json
-)
+# motion_post = hp.post(
+#   'http://localhost:80/event/by/keyid',
+#   headers: { 'content-type' => 'application/json' },
+#   body: motion_body.to_json
+# )
 
 tamper_body = {
-  sensorName: "234",
-  dataSource: "Tamper"
+  location: "Lab_Halo",
+  detected: "Tamper"
 }
 
 tamper_post = hp.post(
@@ -25,5 +25,5 @@ tamper_post = hp.post(
   body: tamper_body.to_json
 )
 
-puts "Motion response code: #{motion_post.code}"
+# puts "Motion response code: #{motion_post.code}"
 puts "Tamper response code: #{tamper_post.code}"

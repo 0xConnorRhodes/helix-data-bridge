@@ -1,12 +1,16 @@
 require 'sinatra'
-require 'vapi'
 require 'dotenv/load'
 require 'json'
+require 'time'
+require 'vapi'
 require 'import_csv'
 require_relative 'lib/load_event_types_config'
 require_relative 'lib/check_config_files'
 require_relative 'lib/check_api_key'
 require_relative 'lib/create_event_types'
+require_relative 'lib/timezone'
+require_relative 'lib/generate_event_timestamp'
+require 'pry'
 
 api_key = ENV['VERKADA_API_KEY']
 $vapi = Vapi.new(api_key)
@@ -20,6 +24,8 @@ def process_config
 
 	create_event_types($event_types_config) if File.exist?('event_types_config.csv')
   $helix_event_types = $vapi.get_helix_event_types if $api_key_status
+
+	$machine_timezone = get_machine_timezone
 end
 
 process_config
@@ -68,33 +74,42 @@ end
 post '/event/by/keyid' do
 	body = JSON.parse(request.body.read)
 
-	helix_event_type_config = nil # remote helix event type config
 	helix_event_attributes = {} # attributes for payload in create_helix_event request
-	device_id_key = nil # key with the value that maps to device id in devices_config
 
 	if $event_types_config.nil? || $event_types_config.empty? || $devices_config.nil? || $devices_config.empty?
 		puts "Failed request: Server configuration is missing. Have you uploaded the necessary config files?"
 		halt 400, { error: "Server configuration is missing. Have you uploaded the necessary config files?" }.to_json
 	end
 
-	$event_types_config.each do |event_type_name, mappings|
- 		event_type_mapping = mappings.find { |mapping| mapping[:data_purpose] == "event type id" }
-		next unless event_type_mapping
+	event_types_by_id = $event_types_config.values.flatten.select {|i| i[:data_purpose] == "event type id"}
 
-		event_id_key = {} # key which identifies which Helix event type this is a request for
-		event_id_key[event_type_mapping[:remote_key]] = event_type_mapping[:helix_key]
-
-		if body[event_id_key.keys.first] == event_id_key.values.first
-			helix_event_type_config = $helix_event_types.select{|et| et[:name] == event_type_name}
-
-			body.keys.each do |key|
-				config_row = $event_types_config[event_type_name].find{|hash| hash[:remote_key] == key}
-				device_id_key = config_row[:remote_key] if config_row[:data_purpose] == "device id"
-				next if config_row[:data_type].nil?
-				helix_event_attributes[config_row[:helix_key]] = body[key]
-			end
+	# unique data that identifies the event type ("event type id" or "metric")
+	event_type_id = event_types_by_id.find do |et|
+		body.any? {|k, v| et.values.include?(k) && et.values.include?(v)}
+	end
+	if event_type_id.nil?
+		event_types_by_metric = $event_types_config.values.flatten.select {|i| i[:data_purpose] == "metric"}
+		event_type_id = event_types_by_metric.find do |et|
+			body.any? {|k, _| et.values.include?(k)}
 		end
 	end
+	if event_type_id.nil?
+		puts "Could not identify even type based on data in body: #{body}"
+		halt 500, { error: "Could not identify event type based on data in body"}.to_json
+	end
+
+	et_name = $event_types_config.find {|_key, arr| arr.include?(event_type_id)}&.first
+	helix_event_type_config = $helix_event_types.select {|i| i[:name] == et_name} # remote helix event type config
+	event_type_mapping = $event_types_config[et_name]
+	device_id_key = event_type_mapping.select {|i| i[:data_purpose] == "device id"}&.first[:remote_key] # key with the value that maps to device id in devices_config
+
+	body.keys.each do |key|
+		config_row = $event_types_config[et_name].find{|hash| hash[:remote_key] == key}
+		next if config_row[:data_type].nil? || config_row[:data_type].start_with?("time")
+		helix_event_attributes[config_row[:helix_key]] = body[key]
+	end
+
+	unix_time = generate_event_timestamp(et_name, event_type_mapping, body)
 
 	begin
 		camera_id = $devices_config.find{|row| row[:device] ==  body[device_id_key]}[:context_camera]
@@ -109,6 +124,7 @@ post '/event/by/keyid' do
 		event_type_uid: helix_event_type_config.first[:event_type_uid],
 		camera_id: camera_id,
 		attributes: helix_event_attributes,
+		time: unix_time
 	)
 	return result
 end

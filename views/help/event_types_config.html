@@ -69,6 +69,13 @@
           <td>event type id</td>
           <td>Motion Alert</td>
         </tr>
+        <tr>
+          <td>time</td>
+          <td>Time</td>
+          <td>time:America/New_York</td>
+          <td>timestamp</td>
+          <td>Motion Alert</td>
+        </tr>
       </tbody>
     </table>
 
@@ -76,12 +83,21 @@
       <ul>
         <li><b>Remote Key</b>: The name of the key in the JSON data sent by the external device</li>
         <li><b>Helix Key</b>: The name of the corresponding key in the Helix event type</li>
-        <li><b>Data Type</b>: Date type for the value that corresponds to that key. The supported types are string, boolean, integer, and float. This field may be left blank if the data purpose is "event type id" (see below.)</li>
+        <li><b>Data Type</b>: Date type for the value that corresponds to that key. The supported types are string, boolean, integer and float. This field may be left blank if the data purpose is "event type id" (see below.)</li>
         <li><b>Data Purpose</b>: This field specifies how the Data Translator should use the data supplied. The supported options are:</li>
         <ul>
+
+
+
           <li><i>metric</i>: Data that will be passed to the Helix event (example: price of a purchased product.)</li>
           <li><i>device id</i>: Identifies which device the event came from. This information is used with the device mappings configuration file to pair an associated camera.</li>
           <li><i>event type id</i>: This data is not used in the Helix event. The presence of this key identifies which Helix event type the data should be associated with. This is only necessary if the same device will be sending events in multiple event types. In the example above, "Noise Level" is used both as a metric and an event type id, so it is entered into the configuration file twice.</li>
+          <li><i>timestamp</i>: This data allows a custom timestamp to be specified in the JSON payload. 
+            The supported formats are those specified in Ruby's <a href="https://docs.ruby-lang.org/en/master/Time.html" target="_blank">Time class</a> 
+            or a complete Unix timestamp. A timezone can be specified in the "Data Type" field in the form "time:$timezone" where "$timezone" is
+            a valid timezone name from <a href="https://www.iana.org/time-zones" target="_blank">IANA Time Zone Database</a>. If a timezone is specified,
+            the timestamp will be converted to the local time of the specified timezone. If no timezone is specified, the timestamp will be converted to the local time of the machine running the Data Bridge.
+            If no timestamp is specified, the current time will be used.</li>
         </ul>
         <li><b>Helix Event Type</b>: The name of the Helix event type this data is associated with</li>
       </ul>

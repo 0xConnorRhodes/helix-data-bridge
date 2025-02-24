@@ -3,7 +3,8 @@ FROM ruby:3.4.1-alpine
 RUN apk add --no-cache \
     git \
     ruby-dev \
-    build-base
+    build-base \
+    tzdata
 
 RUN git clone https://github.com/0xConnorRhodes/ruby-modules.git /tmp/ruby-modules && \
     find /tmp/ruby-modules -type f ! -name "*.rb" -delete && \
@@ -17,6 +18,7 @@ RUN git clone https://github.com/0xConnorRhodes/verkada-api-rb.git /tmp/ruby-vap
 
 WORKDIR /app
 COPY Gemfile .
+# RUN bundle config set without 'development'
 RUN bundle install
 
 COPY ../lib/ /app/lib/

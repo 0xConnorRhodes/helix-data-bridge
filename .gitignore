@@ -2,4 +2,4 @@
 **/.env
 *.csv
 *.bak
-last_error.txt
+tmp/

@@ -9,6 +9,10 @@ services:
     environment:
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=changeme
+    # volumes:
+    #   - ./.env:/app/.env # contents: VERKADA_API_KEY="mykey"
+    #   - ./devices_config.csv:/app/devices_config.csv
+    #   - ./event_types_config.csv:/app/event_types_config.csv
 
   caddy:
     image: caddy:latest

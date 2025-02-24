@@ -10,7 +10,6 @@ require_relative 'lib/check_api_key'
 require_relative 'lib/create_event_types'
 require_relative 'lib/timezone'
 require_relative 'lib/generate_event_timestamp'
-require 'pry'
 
 api_key = ENV['VERKADA_API_KEY']
 $vapi = Vapi.new(api_key)

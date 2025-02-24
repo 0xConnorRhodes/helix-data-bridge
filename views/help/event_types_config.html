@@ -91,7 +91,9 @@
 
           <li><i>metric</i>: Data that will be passed to the Helix event (example: price of a purchased product.)</li>
           <li><i>device id</i>: Identifies which device the event came from. This information is used with the device mappings configuration file to pair an associated camera.</li>
-          <li><i>event type id</i>: This data is not used in the Helix event. The presence of this key identifies which Helix event type the data should be associated with. This is only necessary if the same device will be sending events in multiple event types. In the example above, "Noise Level" is used both as a metric and an event type id, so it is entered into the configuration file twice.</li>
+          <li><i>event type id</i>: This data is not used in the Helix event. The presence of this key identifies which Helix event type the data should be associated with. 
+            This is only necessary if the same device will be sending events in multiple event types. In the example above, "Noise Level" is used both as a metric and an event type id, 
+            so it is entered into the configuration file twice. If no event type id is provided, the data bridge will attempt to use the metric to infer the correct event type.</li>
           <li><i>timestamp</i>: This data allows a custom timestamp to be specified in the JSON payload. 
             The supported formats are those specified in Ruby's <a href="https://docs.ruby-lang.org/en/master/Time.html" target="_blank">Time class</a> 
             or a complete Unix timestamp. A timezone can be specified in the "Data Type" field in the form "time:$timezone" where "$timezone" is

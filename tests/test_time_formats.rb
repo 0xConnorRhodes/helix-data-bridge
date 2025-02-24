@@ -4,7 +4,7 @@ require 'time'
 
 hp = HTTParty
 
-location = "Test_Device"
+location = "Lab_Halo"
 event = "Tamper"
 
 # Define the different time formats as pairs of [description, formatter lambda]

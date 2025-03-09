@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  
+
 </body>
 </html>
 <p>
@@ -26,55 +26,55 @@
     <table>
       <thead>
         <tr>
+          <th>Helix Event Type</th>
           <th>Remote Key</th>
           <th>Helix Key</th>
           <th>Data Type</th>
           <th>Data Purpose</th>
-          <th>Helix Event Type</th>
         </tr>
       </thead>
       <tbody>
         <tr>
+          <td>Noise Alert</td>
           <td>sensorName</td>
           <td>Sensor Name</td>
           <td>string</td>
           <td>device id</td>
-          <td>Noise Alert</td>
         </tr>
         <tr>
+          <td>Noise Alert</td>
           <td>dataSource</td>
           <td>Noise Level</td>
           <td>float</td>
           <td>metric</td>
-          <td>Noise Alert</td>
         </tr>
         <tr>
+          <td>Noise Alert</td>
           <td>dataSource</td>
           <td>Noise Level</td>
           <td></td>
           <td>event type id</td>
-          <td>Noise Alert</td>
         </tr>
         <tr>
+          <td>Motion Alert</td>
           <td>sensorName</td>
           <td>Sensor Name</td>
           <td>string</td>
           <td>device id</td>
-          <td>Motion Alert</td>
         </tr>
         <tr>
+          <td>Motion Alert</td>
           <td>dataSource</td>
           <td>Motion</td>
           <td></td>
           <td>event type id</td>
-          <td>Motion Alert</td>
         </tr>
         <tr>
+          <td>Motion Alert</td>
           <td>time</td>
           <td>Time</td>
           <td>time:America/New_York</td>
           <td>timestamp</td>
-          <td>Motion Alert</td>
         </tr>
       </tbody>
     </table>
@@ -91,11 +91,11 @@
 
           <li><i>metric</i>: Data that will be passed to the Helix event (example: price of a purchased product.)</li>
           <li><i>device id</i>: Identifies which device the event came from. This information is used with the device mappings configuration file to pair an associated camera.</li>
-          <li><i>event type id</i>: This data is not used in the Helix event. The presence of this key identifies which Helix event type the data should be associated with. 
-            This is only necessary if the same device will be sending events in multiple event types. In the example above, "Noise Level" is used both as a metric and an event type id, 
+          <li><i>event type id</i>: This data is not used in the Helix event. The presence of this key identifies which Helix event type the data should be associated with.
+            This is only necessary if the same device will be sending events in multiple event types. In the example above, "Noise Level" is used both as a metric and an event type id,
             so it is entered into the configuration file twice. If no event type id is provided, the data bridge will attempt to use the metric to infer the correct event type.</li>
-          <li><i>timestamp</i>: This data allows a custom timestamp to be specified in the JSON payload. 
-            The supported formats are those specified in Ruby's <a href="https://docs.ruby-lang.org/en/master/Time.html" target="_blank">Time class</a> 
+          <li><i>timestamp</i>: This data allows a custom timestamp to be specified in the JSON payload.
+            The supported formats are those specified in Ruby's <a href="https://docs.ruby-lang.org/en/master/Time.html" target="_blank">Time class</a>
             or a complete Unix timestamp. A timezone can be specified in the "Data Type" field in the form "time:$timezone" where "$timezone" is
             a valid timezone name from <a href="https://www.iana.org/time-zones" target="_blank">IANA Time Zone Database</a>. If a timezone is specified,
             the timestamp will be converted to the local time of the specified timezone. If no timezone is specified, the timestamp will be converted to the local time of the machine running the Data Bridge.

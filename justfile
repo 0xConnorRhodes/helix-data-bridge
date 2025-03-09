@@ -5,7 +5,15 @@ reset:
 build:
 	docker build -t helix-dev -f deploy/container-build/Containerfile .
 
-run:
+run-noconfig:
+	docker run -it --rm \
+	--name helix \
+	--hostname helix \
+	-p 80:80 \
+	-v "$(pwd)/.env:/app/.env" \
+	helix-dev
+
+run-with-config:
 	docker run -it --rm \
 	--name helix \
 	--hostname helix \

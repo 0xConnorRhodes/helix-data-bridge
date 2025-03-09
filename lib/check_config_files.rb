@@ -16,7 +16,7 @@ def check_event_config(config_hash)
   helix_event_types = $vapi.get_helix_event_types
 
   required_keys = ["remote_key", "helix_key", "data_type", "data_purpose"]
-  
+
   config_hash.each do |event_type, mappings|
     mappings.each do |mapping|
       missing_keys = required_keys.map(&:to_sym) - mapping.keys
@@ -39,7 +39,7 @@ def check_event_config(config_hash)
   end
 
   present_events = compare_event_types(
-  	local_config: sanitized_hash, 
+  	local_config: sanitized_hash,
   	remote_config: helix_event_types
   )
 
@@ -56,10 +56,10 @@ def check_event_config(config_hash)
   		message << "EVENT TYPE WARNING: Event type \"#{pres_event}\" already exists, but it does not match the local event type config"
   		message << "The local config schema is:"
   		message << JSON.pretty_generate(JSON.parse(local_schema.to_json))
-  
+
   		message << "The remote config schema is:"
   		message << JSON.pretty_generate(JSON.parse(remote_schema.to_json))
-  
+
   		message << "Please reconcile the event types by modifying the config file or the event type schema in Command. See <a href='https://apidocs.verkada.com/reference/getting-started' target='_blank'>here</a> for more information."
   	end
   end
@@ -74,7 +74,7 @@ def check_event_config(config_hash)
 end
 
 def check_data_purpose_field(config_hash)
-  valid_data_purposes = ["device id", "event type id", "metric"]
+  valid_data_purposes = ["device id", "event type id", "metric", "timestamp"]
   config_hash.each do |event_type, mappings|
     mappings.each do |mapping|
       unless valid_data_purposes.include?(mapping[:data_purpose])
@@ -87,11 +87,11 @@ end
 
 def check_devices_config(config_array)
   message = []
-  
+
   # Check column names
   expected_columns = ["device", "context_camera"]
   actual_columns = config_array.first&.keys&.map(&:to_s)
-  
+
   unless actual_columns == expected_columns
     message << "DEVICE MAPPING ERROR: Invalid columns in device mappings config. Expected 'Device' and 'Context Camera', got: #{actual_columns.join(', ')}"
     return message

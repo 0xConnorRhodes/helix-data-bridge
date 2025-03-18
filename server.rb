@@ -103,7 +103,7 @@ post '/event/by/keyid' do
 	helix_event_attributes = {} # attributes for payload in create_helix_event request
 	body.keys.each do |key|
 		config_row = $event_types_config[et_name].find{|hash| hash[:remote_key] == key}
-		next if config_row[:data_type].nil? || config_row[:data_type].start_with?("time")
+                next if config_row.nil? || config_row[:data_type].nil? || config_row[:data_type].start_with?("time")
 		helix_event_attributes[config_row[:helix_key]] = body[key]
 	end
 
